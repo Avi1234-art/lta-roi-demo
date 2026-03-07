@@ -276,6 +276,9 @@
                 ],
                 usedMock: false
             });
+            if (typeof window.recalculate === "function") {
+                window.recalculate();
+            }
         }
 
         /* Small delay to let calculator recalculate */
