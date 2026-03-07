@@ -40,8 +40,8 @@
     }
 
     let startTime = performance.now();
-    const DURATION = 900; /* ms total animation length */
-    const FADE_START = 350; /* ms when fade-out begins */
+    const DURATION = 1600; /* ms total animation length */
+    const FADE_START = 700; /* ms when fade-out begins */
     let animId;
 
     function draw(now) {

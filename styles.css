@@ -16,7 +16,7 @@
   --border-subtle: #2a1d15;
   --card: #1e1e1e;
   --ring: #dc9f85;
-  --dim: #66473b;
+  --dim: #9a7d6e;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -191,9 +191,7 @@ h3 {
 }
 
 .section-label .rule {
-  height: 1px;
-  flex: 1;
-  background: var(--border);
+  display: none;
 }
 
 .section-label .label {
@@ -203,6 +201,15 @@ h3 {
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--accent);
+}
+
+/* ——— Results subheading ——— */
+.results-sub {
+  color: var(--muted-foreground);
+  font-size: 0.95rem;
+  font-weight: 400;
+  margin-top: -0.4rem;
+  margin-bottom: 0.6rem;
 }
 
 /* ——— Cards ——— */
@@ -679,6 +686,37 @@ label {
   box-shadow: var(--shadow-md);
 }
 
+/* Formula tooltip on KPI hover */
+.kpi-card {
+  position: relative;
+  overflow: visible;
+}
+
+.kpi-formula {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: #2a2218;
+  color: var(--foreground);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  padding: 0.4rem 0.7rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease-out;
+  z-index: 20;
+}
+
+.kpi-card:hover .kpi-formula {
+  opacity: 1;
+}
+
 .kpi-value {
   margin: 0;
   font-family: "Playfair Display", Georgia, serif;
@@ -810,7 +848,7 @@ label {
   pointer-events: none;
   background: var(--background);
   opacity: 1;
-  animation: fadeOutOverlay 600ms 150ms ease-out forwards;
+  animation: fadeOutOverlay 900ms 500ms ease-out forwards;
 }
 
 .page-transition canvas {
