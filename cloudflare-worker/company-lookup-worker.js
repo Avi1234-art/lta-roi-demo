@@ -376,18 +376,6 @@ export default {
       });
     }
 
-    if (requestUrl.pathname !== "/company-lookup") {
-      return jsonResponse(
-        {
-          message: "Persana company lookup worker",
-          usage: "GET /company-lookup?name=HubSpot"
-        },
-        200,
-        origin,
-        env
-      );
-    }
-
     if (request.method !== "GET") {
       return jsonResponse({ error: "Method not allowed" }, 405, origin, env);
     }
@@ -395,6 +383,60 @@ export default {
     const allowedOrigins = getAllowedOrigins(env);
     if (origin && !allowedOrigins.includes(origin)) {
       return jsonResponse({ error: "Origin not allowed" }, 403, origin, env);
+    }
+
+    /* ——— /company-search: live autocomplete via Wikipedia OpenSearch ——— */
+    if (requestUrl.pathname === "/company-search") {
+      const query = (requestUrl.searchParams.get("q") || "").trim();
+      if (!query) {
+        return jsonResponse({ results: [] }, 200, origin, env);
+      }
+
+      const limit = Math.min(parseInt(requestUrl.searchParams.get("limit") || "6", 10), 10);
+
+      try {
+        const endpoint = new URL("https://en.wikipedia.org/w/api.php");
+        endpoint.searchParams.set("action", "opensearch");
+        endpoint.searchParams.set("search", query);
+        endpoint.searchParams.set("limit", String(limit));
+        endpoint.searchParams.set("namespace", "0");
+        endpoint.searchParams.set("format", "json");
+
+        const response = await fetch(endpoint.toString());
+        if (!response.ok) {
+          return jsonResponse({ results: [] }, 200, origin, env);
+        }
+
+        const payload = await response.json();
+        const titles = payload[1] || [];
+        const descriptions = payload[2] || [];
+
+        const results = titles.map((title, i) => {
+          const guessedDomain = title.toLowerCase().replace(/[\s,.']+/g, "").replace(/inc$|corp$|corporation$|company$|ltd$|llc$/i, "") + ".com";
+          return {
+            name: title,
+            description: descriptions[i] || "",
+            logoUrl: `https://logo.clearbit.com/${guessedDomain}`
+          };
+        });
+
+        return jsonResponse({ results }, 200, origin, env);
+      } catch (error) {
+        return jsonResponse({ results: [] }, 200, origin, env);
+      }
+    }
+
+    /* ——— /company-lookup: full data lookup ——— */
+    if (requestUrl.pathname !== "/company-lookup") {
+      return jsonResponse(
+        {
+          message: "Persana company lookup worker",
+          usage: "GET /company-lookup?name=HubSpot  |  GET /company-search?q=goo&limit=6"
+        },
+        200,
+        origin,
+        env
+      );
     }
 
     const companyName = (requestUrl.searchParams.get("name") || "").trim();

@@ -1047,27 +1047,61 @@ function initInfoTooltips() {
 
 /* ——— Autocomplete dropdown ——— */
 let autocompleteDropdown = null;
+let autocompleteDebounceTimer = null;
+let autocompleteRequestId = 0; /* Prevents stale responses from overwriting newer ones */
 
 function onAutocompleteInput() {
   if (lookupMode !== "ai") { hideAutocomplete(); return; }
   const query = companyNameInput.value.trim().toLowerCase();
-  if (!query) { hideAutocomplete(); return; }
+  if (!query || query.length < 1) { hideAutocomplete(); return; }
 
-  const matches = DEFAULT_MOCKS.filter((mock) =>
+  /* Instant: show local matches immediately */
+  const localMatches = DEFAULT_MOCKS.filter((mock) =>
     mock.companyName.toLowerCase().includes(query) ||
     mock.aliases.some((a) => a.includes(query))
   );
+  renderAutocomplete(localMatches, [], query);
 
-  if (matches.length === 0) { hideAutocomplete(); return; }
-  showAutocomplete(matches);
+  /* Debounced: fetch live results from the worker after a short delay */
+  clearTimeout(autocompleteDebounceTimer);
+  if (query.length >= 2) {
+    autocompleteDebounceTimer = setTimeout(() => fetchLiveAutocomplete(query, localMatches), 250);
+  }
 }
 
-function showAutocomplete(matches) {
+async function fetchLiveAutocomplete(query, localMatches) {
+  const requestId = ++autocompleteRequestId;
+  try {
+    const url = WORKER_LOOKUP_URL.replace("/company-lookup", "/company-search") + "?q=" + encodeURIComponent(query) + "&limit=6";
+    const response = await fetch(url);
+    if (!response.ok) return;
+    const data = await response.json();
+    /* Only update if this is still the latest request and the input hasn't changed */
+    if (requestId !== autocompleteRequestId) return;
+    const currentQuery = companyNameInput.value.trim().toLowerCase();
+    if (currentQuery !== query) return;
+
+    const liveResults = (data.results || []).filter((r) => {
+      /* Remove results that already appear in local matches */
+      const name = r.name.toLowerCase();
+      return !localMatches.some((m) => m.companyName.toLowerCase() === name);
+    });
+
+    renderAutocomplete(localMatches, liveResults, query);
+  } catch (err) {
+    /* Silently fail — local results are already shown */
+  }
+}
+
+function renderAutocomplete(localMatches, liveResults, query) {
+  if (localMatches.length === 0 && liveResults.length === 0) { hideAutocomplete(); return; }
+
   hideAutocomplete();
   autocompleteDropdown = document.createElement("div");
   autocompleteDropdown.className = "autocomplete-dropdown";
 
-  matches.forEach((mock) => {
+  /* Local (instant) results */
+  localMatches.forEach((mock) => {
     const item = document.createElement("div");
     item.className = "autocomplete-item";
     const domain = mock.logoUrl.replace("https://logo.clearbit.com/", "");
@@ -1088,7 +1122,42 @@ function showAutocomplete(matches) {
     autocompleteDropdown.appendChild(item);
   });
 
-  /* Position relative to search row (not the full input-group, to avoid being cut off by text below) */
+  /* Live (API) results */
+  if (liveResults.length > 0) {
+    if (localMatches.length > 0) {
+      const divider = document.createElement("div");
+      divider.className = "autocomplete-divider";
+      autocompleteDropdown.appendChild(divider);
+    }
+    liveResults.forEach((result) => {
+      const item = document.createElement("div");
+      item.className = "autocomplete-item autocomplete-item--live";
+      item.innerHTML = `
+        <img class="autocomplete-logo" src="${result.logoUrl}" alt=""
+             onerror="this.src='https://www.google.com/s2/favicons?domain=${result.name.toLowerCase().replace(/[\\s]+/g,'')}.com&sz=64'" />
+        <div class="autocomplete-info">
+          <span class="autocomplete-name">${result.name}</span>
+          <span class="autocomplete-meta">${result.description ? result.description.substring(0, 60) : "Search via Wikipedia"}</span>
+        </div>
+      `;
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        companyNameInput.value = result.name;
+        hideAutocomplete();
+        onAutofillClicked();
+      });
+      autocompleteDropdown.appendChild(item);
+    });
+  }
+
+  /* Loading indicator (shown briefly while API hasn't returned yet) */
+  if (liveResults.length === 0 && query.length >= 2) {
+    const loader = document.createElement("div");
+    loader.className = "autocomplete-loader";
+    loader.textContent = "Searching more companies…";
+    autocompleteDropdown.appendChild(loader);
+  }
+
   const parent = companySearchRow || companyNameInput.parentElement;
   parent.style.position = "relative";
   parent.appendChild(autocompleteDropdown);

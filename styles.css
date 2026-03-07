@@ -311,7 +311,7 @@ label {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  max-height: 240px;
+  max-height: 320px;
   overflow-y: auto;
   box-shadow: var(--shadow-md);
   margin-top: 4px;
@@ -353,6 +353,32 @@ label {
 .autocomplete-meta {
   font-size: 0.72rem;
   color: var(--dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 240px;
+}
+
+.autocomplete-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 0;
+}
+
+.autocomplete-loader {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.75rem;
+  color: var(--dim);
+  text-align: center;
+  font-style: italic;
+}
+
+.autocomplete-item--live .autocomplete-name::after {
+  content: "↗";
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.7rem;
+  opacity: 0.5;
 }
 
 /* ——— Mode toggle ——— */
