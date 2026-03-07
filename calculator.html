@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="/lta-roi-demo/styles.css" />
 </head>
@@ -231,11 +231,19 @@
           <h2 id="results-heading">Scenario: <span id="activeScenarioName">Low</span></h2>
           <p class="results-sub">See how Persana AI would impact your business performance</p>
         </div>
-        <div class="impact-meter" id="impactMeter">
-          <div class="impact-meter-track">
-            <div class="impact-meter-fill" id="impactFill"></div>
+        <div class="impact-gauge" id="impactMeter">
+          <span class="impact-gauge-title">Expected Impact</span>
+          <div class="impact-gauge-track">
+            <div class="impact-gauge-fill" id="impactFill"></div>
+            <div class="impact-gauge-marker" id="impactMarker"></div>
           </div>
-          <span class="impact-meter-label" id="impactLabel">—</span>
+          <div class="impact-gauge-labels">
+            <span>Low</span>
+            <span>Moderate</span>
+            <span>Strong</span>
+            <span>Exceptional</span>
+          </div>
+          <span class="impact-gauge-rating" id="impactLabel">—</span>
         </div>
       </div>
 
@@ -296,22 +304,34 @@
 
       <div class="charts-grid">
         <article class="chart-card">
-          <h3>ROI by scenario</h3>
+          <div class="chart-card-header">
+            <h3 class="chart-card-title">ROI by Scenario</h3>
+            <p class="chart-card-desc">Return on investment percentage</p>
+          </div>
           <div class="chart-wrap">
             <canvas id="roiChart" aria-label="ROI by scenario" role="img"></canvas>
           </div>
+          <div class="chart-card-footer" id="roiChartFooter"></div>
         </article>
         <article class="chart-card">
-          <h3>Benefit breakdown</h3>
+          <div class="chart-card-header">
+            <h3 class="chart-card-title">Benefit Breakdown</h3>
+            <p class="chart-card-desc">Time, tool, and revenue savings</p>
+          </div>
           <div class="chart-wrap">
             <canvas id="breakdownChart" aria-label="Benefit breakdown by scenario" role="img"></canvas>
           </div>
+          <div class="chart-card-footer" id="breakdownChartFooter"></div>
         </article>
         <article class="chart-card">
-          <h3>Payback period</h3>
+          <div class="chart-card-header">
+            <h3 class="chart-card-title">Payback Period</h3>
+            <p class="chart-card-desc">Months to recover investment</p>
+          </div>
           <div class="chart-wrap">
             <canvas id="paybackChart" aria-label="Payback months by scenario" role="img"></canvas>
           </div>
+          <div class="chart-card-footer" id="paybackChartFooter"></div>
         </article>
       </div>
     </section>

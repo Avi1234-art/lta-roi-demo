@@ -425,40 +425,53 @@ let previousKpiValues = {
 function animateValue(element, start, end, duration, formatter) {
   if (Math.abs(start - end) < 0.01) { element.textContent = formatter(end); return; }
   const startTime = performance.now();
-  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function easeOutExpo(t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }
   function tick(now) {
     const elapsed = now - startTime;
     const progress = Math.min(elapsed / duration, 1);
-    const current = start + (end - start) * easeOutCubic(progress);
+    const current = start + (end - start) * easeOutExpo(progress);
     element.textContent = formatter(current);
     if (progress < 1) requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
+
+  /* Trigger pop animation on the parent kpi-card */
+  const card = element.closest(".kpi-card");
+  if (card) {
+    card.classList.remove("kpi-pop");
+    void card.offsetWidth; /* force reflow to restart animation */
+    card.classList.add("kpi-pop");
+  }
 }
 
 function updateImpactMeter(roiPct) {
-  const fill = document.getElementById("impactFill");
+  const marker = document.getElementById("impactMarker");
   const label = document.getElementById("impactLabel");
-  if (!fill || !label) return;
+  if (!marker || !label) return;
 
-  let level, height, color;
-  if (roiPct < 200) {
-    level = "low"; height = "33%"; color = "#ef4444";
-  } else if (roiPct < 800) {
-    level = "medium"; height = "66%"; color = "#eab308";
+  /* Map ROI% to 0-100% position on gauge (cap at 1500% ROI) */
+  const clamped = Math.max(0, Math.min(roiPct, 1500));
+  const pct = (clamped / 1500) * 100;
+  marker.style.left = `${pct}%`;
+
+  let level, text;
+  if (roiPct < 150) {
+    level = "low"; text = `Low Impact \u2022 ${formatPercent(roiPct)} ROI`;
+  } else if (roiPct < 500) {
+    level = "moderate"; text = `Moderate Impact \u2022 ${formatPercent(roiPct)} ROI`;
+  } else if (roiPct < 1000) {
+    level = "strong"; text = `Strong Impact \u2022 ${formatPercent(roiPct)} ROI`;
   } else {
-    level = "high"; height = "100%"; color = "#22c55e";
+    level = "exceptional"; text = `Exceptional \u2022 ${formatPercent(roiPct)} ROI`;
   }
 
-  fill.style.height = height;
-  fill.style.background = color;
-  label.textContent = level.charAt(0).toUpperCase() + level.slice(1);
+  label.textContent = text;
   label.dataset.level = level;
 }
 
 function renderKpis(result) {
   outputNodes.activeScenarioName.textContent = SCENARIO_LABELS[activeScenario];
-  const duration = 600;
+  const duration = 800;
 
   animateValue(outputNodes.kpiRoiPct, previousKpiValues.roiPct, result.roiPct, duration, formatPercent);
 
@@ -491,10 +504,11 @@ function renderKpis(result) {
 
 function buildChartTheme() {
   return {
-    axis: "#b6a596",
+    axis: "#8a7a6e",
     accent: "#dc9f85",
     accentSecondary: "#e5ad94",
     border: "#35211a",
+    gridLine: "rgba(53, 33, 26, 0.4)",
     foreground: "#e8ddd0"
   };
 }
@@ -515,14 +529,31 @@ function createOrUpdateCharts(resultsByScenario) {
     revenue: SCENARIOS.map((scenario) => round(resultsByScenario[scenario].revenueLiftUsd))
   };
 
+  const chartFont = { family: "'Inter', system-ui, sans-serif" };
+
+  const tooltipStyle = {
+    backgroundColor: "#1e1e1e",
+    titleColor: "#e8ddd0",
+    bodyColor: "#b6a596",
+    borderColor: "#35211a",
+    borderWidth: 1,
+    cornerRadius: 8,
+    padding: 10,
+    displayColors: false,
+    titleFont: { ...chartFont, weight: "600", size: 13 },
+    bodyFont: { ...chartFont, size: 12 }
+  };
+
   const commonScales = {
     x: {
-      ticks: { color: theme.axis },
-      grid: { color: theme.border }
+      ticks: { color: theme.axis, font: { ...chartFont, size: 12, weight: "500" } },
+      grid: { display: false },
+      border: { display: false }
     },
     y: {
-      ticks: { color: theme.axis },
-      grid: { color: theme.border }
+      ticks: { color: theme.axis, font: { ...chartFont, size: 11 } },
+      grid: { color: theme.gridLine, lineWidth: 0.8 },
+      border: { display: false }
     }
   };
 
@@ -534,16 +565,16 @@ function createOrUpdateCharts(resultsByScenario) {
         datasets: [{
           label: "ROI %",
           data: roiData,
-          borderWidth: 1,
-          borderColor: SCENARIO_COLORS.border,
           backgroundColor: SCENARIO_COLORS.bg,
-          borderRadius: 6
+          borderRadius: 8,
+          borderSkipped: false,
+          maxBarThickness: 56
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        plugins: { legend: { display: false }, tooltip: tooltipStyle },
         scales: commonScales
       }
     });
@@ -562,19 +593,23 @@ function createOrUpdateCharts(resultsByScenario) {
             label: "Time savings",
             data: breakdownData.time,
             backgroundColor: BREAKDOWN_COLORS.time,
-            borderRadius: 4
+            borderRadius: 4,
+            maxBarThickness: 56
           },
           {
             label: "Tool savings",
             data: breakdownData.tools,
             backgroundColor: BREAKDOWN_COLORS.tools,
-            borderRadius: 4
+            borderRadius: 4,
+            maxBarThickness: 56
           },
           {
             label: "Revenue lift",
             data: breakdownData.revenue,
             backgroundColor: BREAKDOWN_COLORS.revenue,
-            borderRadius: 4
+            borderRadius: 8,
+            borderSkipped: false,
+            maxBarThickness: 56
           }
         ]
       },
@@ -582,16 +617,22 @@ function createOrUpdateCharts(resultsByScenario) {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          x: { stacked: true, ticks: { color: theme.axis }, grid: { color: theme.border } },
-          y: { stacked: true, ticks: { color: theme.axis }, grid: { color: theme.border } }
+          x: { stacked: true, ...commonScales.x },
+          y: { stacked: true, ...commonScales.y }
         },
         plugins: {
           legend: {
             labels: {
               color: theme.foreground,
-              boxWidth: 12
+              boxWidth: 10,
+              boxHeight: 10,
+              borderRadius: 3,
+              useBorderRadius: true,
+              font: { ...chartFont, size: 11 },
+              padding: 12
             }
-          }
+          },
+          tooltip: tooltipStyle
         }
       }
     });
@@ -610,22 +651,49 @@ function createOrUpdateCharts(resultsByScenario) {
         datasets: [{
           label: "Payback (months)",
           data: paybackData,
-          borderWidth: 1,
-          borderColor: SCENARIO_COLORS.border,
           backgroundColor: SCENARIO_COLORS.bg,
-          borderRadius: 6
+          borderRadius: 8,
+          borderSkipped: false,
+          maxBarThickness: 56
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        plugins: { legend: { display: false }, tooltip: tooltipStyle },
         scales: commonScales
       }
     });
   } else {
     chartInstances.payback.data.datasets[0].data = paybackData;
     chartInstances.payback.update();
+  }
+
+  /* Update chart card footers with key insights */
+  updateChartFooters(resultsByScenario);
+}
+
+function updateChartFooters(resultsByScenario) {
+  const roiFooter = document.getElementById("roiChartFooter");
+  const breakdownFooter = document.getElementById("breakdownChartFooter");
+  const paybackFooter = document.getElementById("paybackChartFooter");
+
+  if (roiFooter) {
+    const bestScenario = SCENARIOS.reduce((a, b) =>
+      resultsByScenario[a].roiPct >= resultsByScenario[b].roiPct ? a : b);
+    roiFooter.innerHTML = `Best case: <span class="chart-footer-highlight">${formatPercent(resultsByScenario[bestScenario].roiPct)}</span> in ${SCENARIO_LABELS[bestScenario]} scenario`;
+  }
+
+  if (breakdownFooter) {
+    const baseBenefit = resultsByScenario.base.totalBenefitUsd;
+    breakdownFooter.innerHTML = `Base total benefit: <span class="chart-footer-highlight">${formatCurrency(baseBenefit)}</span>`;
+  }
+
+  if (paybackFooter) {
+    const basePayback = resultsByScenario.base.paybackMonths;
+    paybackFooter.innerHTML = Number.isFinite(basePayback)
+      ? `Base payback: <span class="chart-footer-highlight">${formatMonths(basePayback)}</span>`
+      : `Base payback: <span class="chart-footer-highlight">Not reached</span>`;
   }
 }
 
