@@ -271,7 +271,7 @@ label {
   transition: background-color 200ms ease-out, color 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out;
 }
 
-.mode-option input:checked + span {
+.mode-option input:checked+span {
   color: var(--foreground);
   border-color: var(--accent);
   background: linear-gradient(180deg, rgba(212, 168, 75, 0.24), rgba(212, 168, 75, 0.08));
@@ -337,14 +337,21 @@ label {
   padding: 0.8rem 1rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, rgba(255,253,248,0.95), rgba(245,243,240,0.95));
+  background: linear-gradient(135deg, rgba(255, 253, 248, 0.95), rgba(245, 243, 240, 0.95));
   box-shadow: var(--shadow-sm);
   animation: fadeSlideIn 300ms ease-out;
 }
 
 @keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .lookup-meta-head {
@@ -394,7 +401,7 @@ label {
   padding-top: 0.4rem;
 }
 
-.sources-toggle > summary {
+.sources-toggle>summary {
   cursor: pointer;
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.72rem;
@@ -419,7 +426,7 @@ label {
   padding-top: 1.1rem;
 }
 
-.advanced-panel > summary {
+.advanced-panel>summary {
   cursor: pointer;
   font-family: "IBM Plex Mono", monospace;
   text-transform: uppercase;
@@ -522,8 +529,8 @@ label {
 .info-tooltip {
   position: fixed;
   z-index: 9999;
-  max-width: 240px;
-  padding: 0.55rem 0.7rem;
+  max-width: 250px;
+  padding: 0.6rem 0.75rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background: #fffdf8;
@@ -535,13 +542,11 @@ label {
   letter-spacing: 0.01em;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 150ms ease-out, transform 150ms ease-out;
+  transition: opacity 150ms ease-out;
 }
 
 .info-tooltip.is-visible {
   opacity: 1;
-  transform: translateY(0);
 }
 
 .assumptions-table input {
@@ -678,6 +683,7 @@ label {
 }
 
 @media (max-width: 980px) {
+
   .input-grid,
   .kpi-grid,
   .charts-grid {
@@ -740,6 +746,7 @@ label {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

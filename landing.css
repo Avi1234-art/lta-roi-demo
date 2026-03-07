@@ -1,0 +1,383 @@
+/* ———————————————————————————————————————————————————
+   Persana AI – Landing Page
+   Dark luxury design system
+   ——————————————————————————————————————————————————— */
+
+:root {
+    --lp-bg: #181818;
+    --lp-surface: #1e1e1e;
+    --lp-text: #e8ddd0;
+    --lp-muted: #b6a596;
+    --lp-dim: #66473b;
+    --lp-accent: #dc9f85;
+    --lp-dark-line: #35211a;
+    --lp-radius: 4px;
+}
+
+/* ——— Reset & base ——— */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    min-height: 100vh;
+    background: var(--lp-bg);
+    color: var(--lp-text);
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+/* ——— Grain overlay ——— */
+.lp-grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9000;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+}
+
+/* ——— Navigation ——— */
+.lp-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.6rem 2.5rem;
+}
+
+.lp-brand {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--lp-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    white-space: nowrap;
+}
+
+.lp-nav-line {
+    flex: 1;
+    height: 1px;
+    background: var(--lp-dark-line);
+}
+
+.lp-nav-status {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--lp-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    white-space: nowrap;
+}
+
+/* ——— Hero ——— */
+.lp-hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 78vh;
+    padding: 8rem 2.5rem 3rem;
+    text-align: center;
+    overflow: hidden;
+}
+
+.lp-hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 2rem;
+    animation: fadeUp 700ms ease-out both;
+}
+
+.lp-label-line {
+    width: 24px;
+    height: 1px;
+    background: var(--lp-accent);
+}
+
+.lp-label-text {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--lp-muted);
+}
+
+/* Headline with ghost-outline depth */
+.lp-headline-wrap {
+    position: relative;
+    line-height: 0.92;
+    animation: fadeUp 700ms 120ms ease-out both;
+}
+
+.lp-headline {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: clamp(4rem, 11.5vw, 11rem);
+    font-weight: 700;
+    color: var(--lp-text);
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 2;
+}
+
+.lp-headline-ghost {
+    position: absolute;
+    inset: 0;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: clamp(4rem, 11.5vw, 11rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--lp-dim);
+    transform: translate(4px, 4px);
+    z-index: 1;
+    user-select: none;
+}
+
+.lp-hero-sub {
+    margin-top: 1.6rem;
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    font-size: 1.15rem;
+    font-weight: 300;
+    color: var(--lp-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    animation: fadeUp 700ms 240ms ease-out both;
+}
+
+/* ——— Divider ——— */
+.lp-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--lp-dark-line);
+}
+
+/* ——— Bottom section ——— */
+.lp-bottom {
+    padding: 4rem 2.5rem 5rem;
+}
+
+.lp-bottom-grid {
+    max-width: 72rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 5fr 1fr 6fr;
+    gap: 0;
+    align-items: start;
+}
+
+/* Value column (left) */
+.lp-value-col {
+    grid-column: 1 / 2;
+    animation: fadeUp 700ms 400ms ease-out both;
+}
+
+.lp-value-text {
+    font-size: 1.18rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--lp-text);
+    max-width: 38ch;
+}
+
+.lp-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 1.6rem;
+}
+
+.lp-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--lp-accent);
+    box-shadow: 0 0 6px rgba(220, 159, 133, 0.4);
+    animation: pulse 2.4s ease-in-out infinite;
+}
+
+.lp-status-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--lp-muted);
+}
+
+/* CTA column (right) */
+.lp-cta-col {
+    grid-column: 3 / 4;
+    animation: fadeUp 700ms 520ms ease-out both;
+}
+
+.lp-cta-heading {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 1.55rem;
+    font-weight: 500;
+    color: var(--lp-text);
+    line-height: 1.3;
+    margin-bottom: 0.9rem;
+}
+
+.lp-cta-desc {
+    font-size: 0.98rem;
+    font-weight: 400;
+    color: var(--lp-muted);
+    line-height: 1.65;
+    max-width: 42ch;
+    margin-bottom: 1.6rem;
+}
+
+.lp-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.85rem 1.5rem;
+    background: var(--lp-accent);
+    color: var(--lp-bg);
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    border: none;
+    border-radius: var(--lp-radius);
+    cursor: pointer;
+    transition: background 200ms ease-out, transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.lp-cta-btn:hover {
+    background: #e5ad94;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(220, 159, 133, 0.2);
+}
+
+.lp-cta-btn:active {
+    transform: translateY(0);
+}
+
+.lp-cta-arrow {
+    font-size: 1.1rem;
+    transition: transform 200ms ease-out;
+}
+
+.lp-cta-btn:hover .lp-cta-arrow {
+    transform: translateX(3px);
+}
+
+.lp-cta-caption {
+    margin-top: 0.9rem;
+    font-size: 0.78rem;
+    color: var(--lp-dim);
+    letter-spacing: 0.04em;
+}
+
+/* ——— Animations ——— */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ——— Responsive ——— */
+@media (max-width: 900px) {
+    .lp-nav {
+        padding: 1.2rem 1.5rem;
+    }
+
+    .lp-hero {
+        min-height: 60vh;
+        padding: 7rem 1.5rem 2.5rem;
+    }
+
+    .lp-headline,
+    .lp-headline-ghost {
+        font-size: clamp(3rem, 14vw, 6rem);
+    }
+
+    .lp-bottom {
+        padding: 2.5rem 1.5rem 3.5rem;
+    }
+
+    .lp-bottom-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .lp-value-col {
+        grid-column: auto;
+    }
+
+    .lp-cta-col {
+        grid-column: auto;
+    }
+
+    .lp-value-text {
+        max-width: none;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .lp-headline,
+    .lp-headline-ghost {
+        font-size: clamp(2.5rem, 16vw, 5rem);
+        letter-spacing: -0.03em;
+    }
+
+    .lp-hero-sub {
+        font-size: 0.95rem;
+    }
+
+    .lp-cta-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
