@@ -19,7 +19,7 @@ const DEFAULT_MOCKS = [
     companyName: "Microsoft",
     employeeEstimate: 221000,
     revenueEstimateUsd: 245000000000,
-    logoUrl: "https://www.google.com/s2/favicons?domain=microsoft.com&sz=128",
+    logoUrl: "https://img.logo.dev/microsoft.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
     confidence: 0.88,
     sources: [
       { label: "Wikipedia: Microsoft", url: "https://en.wikipedia.org/wiki/Microsoft", field: "company" },
@@ -31,7 +31,7 @@ const DEFAULT_MOCKS = [
     companyName: "Salesforce",
     employeeEstimate: 72682,
     revenueEstimateUsd: 34860000000,
-    logoUrl: "https://www.google.com/s2/favicons?domain=salesforce.com&sz=128",
+    logoUrl: "https://img.logo.dev/salesforce.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
     confidence: 0.84,
     sources: [
       { label: "Wikipedia: Salesforce", url: "https://en.wikipedia.org/wiki/Salesforce", field: "company" },
@@ -43,7 +43,7 @@ const DEFAULT_MOCKS = [
     companyName: "HubSpot",
     employeeEstimate: 8400,
     revenueEstimateUsd: 2200000000,
-    logoUrl: "https://www.google.com/s2/favicons?domain=hubspot.com&sz=128",
+    logoUrl: "https://img.logo.dev/hubspot.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
     confidence: 0.79,
     sources: [
       { label: "Wikipedia: HubSpot", url: "https://en.wikipedia.org/wiki/HubSpot", field: "company" }
@@ -54,7 +54,7 @@ const DEFAULT_MOCKS = [
     companyName: "Adobe",
     employeeEstimate: 29800,
     revenueEstimateUsd: 21500000000,
-    logoUrl: "https://www.google.com/s2/favicons?domain=adobe.com&sz=128",
+    logoUrl: "https://img.logo.dev/adobe.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
     confidence: 0.82,
     sources: [
       { label: "Wikipedia: Adobe", url: "https://en.wikipedia.org/wiki/Adobe_Inc.", field: "company" }
@@ -65,7 +65,7 @@ const DEFAULT_MOCKS = [
     companyName: "Oracle",
     employeeEstimate: 159000,
     revenueEstimateUsd: 53000000000,
-    logoUrl: "https://www.google.com/s2/favicons?domain=oracle.com&sz=128",
+    logoUrl: "https://img.logo.dev/oracle.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
     confidence: 0.84,
     sources: [
       { label: "Wikipedia: Oracle", url: "https://en.wikipedia.org/wiki/Oracle_Corporation", field: "company" }
@@ -76,7 +76,7 @@ const DEFAULT_MOCKS = [
     companyName: "Google",
     employeeEstimate: 182502,
     revenueEstimateUsd: 307400000000,
-    logoUrl: "https://www.google.com/s2/favicons?domain=google.com&sz=128",
+    logoUrl: "https://img.logo.dev/google.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
     confidence: 0.9,
     sources: [
       { label: "Wikipedia: Google", url: "https://en.wikipedia.org/wiki/Google", field: "company" },
@@ -88,7 +88,7 @@ const DEFAULT_MOCKS = [
     companyName: "Tesla",
     employeeEstimate: 140473,
     revenueEstimateUsd: 96773000000,
-    logoUrl: "https://www.google.com/s2/favicons?domain=tesla.com&sz=128",
+    logoUrl: "https://img.logo.dev/tesla.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
     confidence: 0.9,
     sources: [
       { label: "Wikipedia: Tesla", url: "https://en.wikipedia.org/wiki/Tesla,_Inc.", field: "company" },
@@ -311,11 +311,11 @@ function renderKpis(result) {
 
 function buildChartTheme() {
   return {
-    axis: "#6b6b6b",
-    accent: "#b8860b",
-    accentSecondary: "#d4a84b",
-    border: "#e8e4df",
-    foreground: "#1a1a1a"
+    axis: "#b6a596",
+    accent: "#dc9f85",
+    accentSecondary: "#e5ad94",
+    border: "#35211a",
+    foreground: "#e8ddd0"
   };
 }
 
@@ -356,7 +356,7 @@ function createOrUpdateCharts(resultsByScenario) {
           data: roiData,
           borderWidth: 1,
           borderColor: theme.accent,
-          backgroundColor: "rgba(184, 134, 11, 0.7)",
+          backgroundColor: "rgba(220, 159, 133, 0.7)",
           borderRadius: 6
         }]
       },
@@ -381,19 +381,19 @@ function createOrUpdateCharts(resultsByScenario) {
           {
             label: "Time savings",
             data: breakdownData.time,
-            backgroundColor: "rgba(184, 134, 11, 0.75)",
+            backgroundColor: "rgba(220, 159, 133, 0.75)",
             borderRadius: 4
           },
           {
             label: "Tool savings",
             data: breakdownData.tools,
-            backgroundColor: "rgba(212, 168, 75, 0.75)",
+            backgroundColor: "rgba(229, 173, 148, 0.65)",
             borderRadius: 4
           },
           {
             label: "Revenue lift",
             data: breakdownData.revenue,
-            backgroundColor: "rgba(56, 56, 56, 0.72)",
+            backgroundColor: "rgba(102, 71, 59, 0.72)",
             borderRadius: 4
           }
         ]
@@ -432,7 +432,7 @@ function createOrUpdateCharts(resultsByScenario) {
           data: paybackData,
           borderWidth: 1,
           borderColor: theme.foreground,
-          backgroundColor: "rgba(26, 26, 26, 0.72)",
+          backgroundColor: "rgba(182, 165, 150, 0.5)",
           borderRadius: 6
         }]
       },

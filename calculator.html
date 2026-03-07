@@ -9,24 +9,36 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@400;500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="/lta-roi-demo/styles.css" />
 </head>
 
 <body>
-  <div class="ambient-glow" aria-hidden="true"></div>
+  <!-- Page transition overlay with floating dots -->
+  <div class="page-transition" id="pageTransition">
+    <canvas id="transitionCanvas"></canvas>
+  </div>
+
   <main class="page-shell">
-    <header class="hero section">
+
+    <!-- Calculator nav -->
+    <nav class="calc-nav" aria-label="Primary">
+      <a href="/lta-roi-demo/" class="calc-nav-brand">← Back</a>
+      <span class="calc-nav-line" aria-hidden="true"></span>
+      <a href="https://persana.ai" target="_blank" rel="noopener noreferrer" class="calc-nav-link">persana.ai</a>
+    </nav>
+
+    <!-- Compact hero -->
+    <header class="hero">
       <div class="section-label" aria-hidden="true">
         <span class="rule"></span>
         <span class="label">Sales Enablement</span>
         <span class="rule"></span>
       </div>
-      <h1>Persana ROI Calculator</h1>
+      <h1>ROI Calculator</h1>
       <p class="hero-copy">
-        Enter a prospect, auto-fill public company context, and walk through Low, Base, and High outcomes during live
-        sales conversations.
+        Enter a prospect, auto-fill company context, and walk through three outcome scenarios.
       </p>
     </header>
 
@@ -285,10 +297,16 @@
       </div>
     </section>
 
+    <!-- Footer with Persana link -->
+    <footer class="calc-footer">
+      <a href="https://persana.ai" target="_blank" rel="noopener noreferrer">Powered by Persana AI →</a>
+    </footer>
+
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
   <script src="/lta-roi-demo/app.js" defer></script>
+  <script src="/lta-roi-demo/transition.js" defer></script>
 </body>
 
 </html>

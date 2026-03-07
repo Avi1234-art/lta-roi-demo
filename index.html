@@ -19,9 +19,9 @@
 
     <!-- Minimal nav -->
     <nav class="lp-nav" aria-label="Primary">
-        <span class="lp-brand">PA—PROTOCOL 01</span>
+        <a href="https://persana.ai" target="_blank" rel="noopener noreferrer" class="lp-brand">Persana AI</a>
         <span class="lp-nav-line" aria-hidden="true"></span>
-        <span class="lp-nav-status">ROI PREVIEW</span>
+        <span class="lp-nav-status">ROI Preview</span>
     </nav>
 
     <!-- Hero -->
@@ -79,6 +79,97 @@
 
     <!-- Ambient grain overlay -->
     <div class="lp-grain" aria-hidden="true"></div>
+
+    <!-- Exit transition overlay -->
+    <div class="lp-exit-overlay" id="exitOverlay">
+        <canvas id="exitCanvas"></canvas>
+    </div>
+
+    <script>
+        /* On CTA click: play a floating-dot exit animation, then navigate */
+        const cta = document.getElementById("launchCalcBtn");
+        const overlay = document.getElementById("exitOverlay");
+        const canvas = document.getElementById("exitCanvas");
+
+        if (cta && overlay && canvas) {
+            cta.addEventListener("click", function (e) {
+                e.preventDefault();
+                const dest = cta.href;
+                overlay.classList.add("is-active");
+
+                const ctx = canvas.getContext("2d");
+                const DPR = window.devicePixelRatio || 1;
+                const W = window.innerWidth;
+                const H = window.innerHeight;
+                canvas.width = W * DPR;
+                canvas.height = H * DPR;
+                canvas.style.width = W + "px";
+                canvas.style.height = H + "px";
+                ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+                const particles = [];
+                for (let i = 0; i < 50; i++) {
+                    particles.push({
+                        x: Math.random() * W,
+                        y: Math.random() * H,
+                        vx: (Math.random() - 0.5) * 1.5,
+                        vy: (Math.random() - 0.5) * 1.5,
+                        r: Math.random() * 2.5 + 1,
+                        alpha: Math.random() * 0.5 + 0.3
+                    });
+                }
+
+                const start = performance.now();
+                const DURATION = 700;
+
+                function draw(now) {
+                    const elapsed = now - start;
+                    const progress = Math.min(elapsed / DURATION, 1);
+                    const globalAlpha = progress;
+
+                    ctx.clearRect(0, 0, W, H);
+
+                    /* Background fade in */
+                    ctx.fillStyle = `rgba(24, 24, 24, ${globalAlpha})`;
+                    ctx.fillRect(0, 0, W, H);
+
+                    /* Draw particles */
+                    for (const p of particles) {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(220, 159, 133, ${p.alpha * globalAlpha})`;
+                        ctx.fill();
+                    }
+
+                    /* Draw connections */
+                    for (let i = 0; i < particles.length; i++) {
+                        for (let j = i + 1; j < particles.length; j++) {
+                            const dx = particles[i].x - particles[j].x;
+                            const dy = particles[i].y - particles[j].y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < 120) {
+                                ctx.beginPath();
+                                ctx.moveTo(particles[i].x, particles[i].y);
+                                ctx.lineTo(particles[j].x, particles[j].y);
+                                ctx.strokeStyle = `rgba(220, 159, 133, ${(1 - dist / 120) * 0.15 * globalAlpha})`;
+                                ctx.lineWidth = 0.5;
+                                ctx.stroke();
+                            }
+                        }
+                    }
+
+                    if (elapsed >= DURATION) {
+                        window.location.href = dest;
+                        return;
+                    }
+                    requestAnimationFrame(draw);
+                }
+                requestAnimationFrame(draw);
+            });
+        }
+    </script>
 
 </body>
 
