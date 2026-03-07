@@ -1,0 +1,322 @@
+const DEMO_MOCKS = [
+  {
+    aliases: ["microsoft", "msft"],
+    companyName: "Microsoft",
+    employeeEstimate: 221000,
+    revenueEstimateUsd: 245000000000,
+    confidence: 0.88,
+    sources: [
+      { label: "Wikipedia: Microsoft", url: "https://en.wikipedia.org/wiki/Microsoft", field: "company" },
+      { label: "Wikidata: Microsoft", url: "https://www.wikidata.org/wiki/Q2283", field: "employeeEstimate,revenueEstimateUsd" }
+    ]
+  },
+  {
+    aliases: ["salesforce", "crm"],
+    companyName: "Salesforce",
+    employeeEstimate: 72682,
+    revenueEstimateUsd: 34860000000,
+    confidence: 0.84,
+    sources: [
+      { label: "Wikipedia: Salesforce", url: "https://en.wikipedia.org/wiki/Salesforce", field: "company" },
+      { label: "Wikidata: Salesforce", url: "https://www.wikidata.org/wiki/Q42576", field: "employeeEstimate,revenueEstimateUsd" }
+    ]
+  },
+  {
+    aliases: ["hubspot"],
+    companyName: "HubSpot",
+    employeeEstimate: 8400,
+    revenueEstimateUsd: 2200000000,
+    confidence: 0.79,
+    sources: [
+      { label: "Wikipedia: HubSpot", url: "https://en.wikipedia.org/wiki/HubSpot", field: "company" }
+    ]
+  },
+  {
+    aliases: ["adobe"],
+    companyName: "Adobe",
+    employeeEstimate: 29800,
+    revenueEstimateUsd: 21500000000,
+    confidence: 0.82,
+    sources: [
+      { label: "Wikipedia: Adobe", url: "https://en.wikipedia.org/wiki/Adobe_Inc.", field: "company" }
+    ]
+  },
+  {
+    aliases: ["oracle"],
+    companyName: "Oracle",
+    employeeEstimate: 159000,
+    revenueEstimateUsd: 53000000000,
+    confidence: 0.84,
+    sources: [
+      { label: "Wikipedia: Oracle", url: "https://en.wikipedia.org/wiki/Oracle_Corporation", field: "company" }
+    ]
+  }
+];
+
+function getAllowedOrigins(env) {
+  const defaultOrigin = "https://avi1234-art.github.io";
+  const configured = (env.ALLOWED_ORIGINS || defaultOrigin)
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+  configured.push("http://localhost:8787");
+  return configured;
+}
+
+function corsHeaders(origin, env) {
+  const allowedOrigins = getAllowedOrigins(env);
+  const selectedOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+
+  return {
+    "Access-Control-Allow-Origin": selectedOrigin,
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "86400",
+    Vary: "Origin"
+  };
+}
+
+function jsonResponse(data, status, origin, env) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      ...corsHeaders(origin, env)
+    }
+  });
+}
+
+function normalizeName(name) {
+  return (name || "").trim().toLowerCase();
+}
+
+function employeeRangeLabel(value) {
+  if (!Number.isFinite(value) || value <= 0) {
+    return "unknown";
+  }
+
+  if (value <= 200) {
+    return "1-200";
+  }
+  if (value <= 1000) {
+    return "201-1000";
+  }
+  if (value <= 5000) {
+    return "1001-5000";
+  }
+  return "5000+";
+}
+
+function findDemoMock(companyName) {
+  const normalized = normalizeName(companyName);
+  return DEMO_MOCKS.find((entry) => entry.aliases.some((alias) => normalized.includes(alias))) || null;
+}
+
+function deterministicFallback(companyName) {
+  const normalized = normalizeName(companyName);
+  let hash = 0;
+
+  for (let i = 0; i < normalized.length; i += 1) {
+    hash = ((hash << 5) - hash + normalized.charCodeAt(i)) | 0;
+  }
+
+  const seed = Math.abs(hash);
+  const employeeEstimate = 120 + (seed % 7000);
+  const revenuePerEmployee = 120000 + (seed % 90000);
+  const revenueEstimateUsd = employeeEstimate * revenuePerEmployee;
+
+  return {
+    companyName,
+    employeeEstimate,
+    employeeRangeLabel: employeeRangeLabel(employeeEstimate),
+    revenueEstimateUsd,
+    confidence: 0.35,
+    sources: [
+      {
+        label: "Deterministic demo fallback",
+        url: "https://en.wikipedia.org/wiki/Main_Page",
+        field: "employeeEstimate,revenueEstimateUsd"
+      }
+    ],
+    usedMock: true
+  };
+}
+
+function parseQuantityClaim(entity, propertyCode) {
+  const claims = entity?.claims?.[propertyCode];
+  if (!Array.isArray(claims) || !claims.length) {
+    return null;
+  }
+
+  for (const claim of claims) {
+    const amountRaw = claim?.mainsnak?.datavalue?.value?.amount;
+    if (!amountRaw) {
+      continue;
+    }
+
+    const parsed = Number.parseFloat(String(amountRaw).replace("+", ""));
+    if (Number.isFinite(parsed)) {
+      return Math.abs(parsed);
+    }
+  }
+
+  return null;
+}
+
+async function fetchWikipediaTitle(companyName) {
+  const endpoint = new URL("https://en.wikipedia.org/w/api.php");
+  endpoint.searchParams.set("action", "opensearch");
+  endpoint.searchParams.set("search", companyName);
+  endpoint.searchParams.set("limit", "1");
+  endpoint.searchParams.set("namespace", "0");
+  endpoint.searchParams.set("format", "json");
+
+  const response = await fetch(endpoint.toString(), {
+    headers: {
+      "User-Agent": "persana-roi-demo/1.0"
+    }
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const payload = await response.json();
+  if (!Array.isArray(payload) || !Array.isArray(payload[1]) || !payload[1][0]) {
+    return null;
+  }
+
+  return payload[1][0];
+}
+
+async function fetchLiveWikidata(companyName) {
+  const title = await fetchWikipediaTitle(companyName);
+  if (!title) {
+    return null;
+  }
+
+  const summaryResponse = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+  if (!summaryResponse.ok) {
+    return null;
+  }
+
+  const summary = await summaryResponse.json();
+  const wikidataId = summary?.wikibase_item;
+  if (!wikidataId) {
+    return null;
+  }
+
+  const entityResponse = await fetch(`https://www.wikidata.org/wiki/Special:EntityData/${wikidataId}.json`);
+  if (!entityResponse.ok) {
+    return null;
+  }
+
+  const entityPayload = await entityResponse.json();
+  const entity = entityPayload?.entities?.[wikidataId];
+  if (!entity) {
+    return null;
+  }
+
+  const employeeEstimate = parseQuantityClaim(entity, "P1128");
+  const revenueEstimateUsd = parseQuantityClaim(entity, "P2139");
+
+  if (!employeeEstimate && !revenueEstimateUsd) {
+    return null;
+  }
+
+  let confidence = 0.45;
+  if (employeeEstimate) {
+    confidence += 0.25;
+  }
+  if (revenueEstimateUsd) {
+    confidence += 0.25;
+  }
+
+  return {
+    companyName: summary?.title || companyName,
+    employeeEstimate: employeeEstimate || null,
+    employeeRangeLabel: employeeRangeLabel(employeeEstimate || 0),
+    revenueEstimateUsd: revenueEstimateUsd || null,
+    confidence: Math.min(0.95, confidence),
+    sources: [
+      {
+        label: `Wikipedia: ${summary?.title || companyName}`,
+        url: summary?.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`,
+        field: "company"
+      },
+      {
+        label: `Wikidata: ${wikidataId}`,
+        url: `https://www.wikidata.org/wiki/${wikidataId}`,
+        field: "employeeEstimate,revenueEstimateUsd"
+      }
+    ],
+    usedMock: false
+  };
+}
+
+export default {
+  async fetch(request, env) {
+    const requestUrl = new URL(request.url);
+    const origin = request.headers.get("Origin") || "";
+
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders(origin, env)
+      });
+    }
+
+    if (requestUrl.pathname !== "/company-lookup") {
+      return jsonResponse(
+        {
+          message: "Persana company lookup worker",
+          usage: "GET /company-lookup?name=HubSpot"
+        },
+        200,
+        origin,
+        env
+      );
+    }
+
+    if (request.method !== "GET") {
+      return jsonResponse({ error: "Method not allowed" }, 405, origin, env);
+    }
+
+    const allowedOrigins = getAllowedOrigins(env);
+    if (origin && !allowedOrigins.includes(origin)) {
+      return jsonResponse({ error: "Origin not allowed" }, 403, origin, env);
+    }
+
+    const companyName = (requestUrl.searchParams.get("name") || "").trim();
+    if (!companyName) {
+      return jsonResponse({ error: "Missing required query parameter: name" }, 400, origin, env);
+    }
+
+    const directMock = findDemoMock(companyName);
+    if (directMock) {
+      return jsonResponse(
+        {
+          ...directMock,
+          employeeRangeLabel: employeeRangeLabel(directMock.employeeEstimate),
+          usedMock: true
+        },
+        200,
+        origin,
+        env
+      );
+    }
+
+    try {
+      const liveResult = await fetchLiveWikidata(companyName);
+      if (liveResult) {
+        return jsonResponse(liveResult, 200, origin, env);
+      }
+    } catch (error) {
+      // Continue to deterministic fallback.
+    }
+
+    const fallback = deterministicFallback(companyName);
+    return jsonResponse(fallback, 200, origin, env);
+  }
+};

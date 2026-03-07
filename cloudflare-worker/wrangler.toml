@@ -1,0 +1,6 @@
+name = "persana-company-lookup"
+main = "company-lookup-worker.js"
+compatibility_date = "2026-03-06"
+
+[vars]
+ALLOWED_ORIGINS = "https://avi1234-art.github.io"
