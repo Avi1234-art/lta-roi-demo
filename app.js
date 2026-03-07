@@ -105,6 +105,116 @@ const DEFAULT_MOCKS = [
       { label: "Wikipedia: Tesla", url: "https://en.wikipedia.org/wiki/Tesla,_Inc.", field: "company" },
       { label: "Wikidata: Tesla", url: "https://www.wikidata.org/wiki/Q478214", field: "employeeEstimate,revenueEstimateUsd" }
     ]
+  },
+  {
+    aliases: ["amazon", "amzn"],
+    companyName: "Amazon",
+    employeeEstimate: 1525000,
+    revenueEstimateUsd: 575000000000,
+    logoUrl: "https://logo.clearbit.com/amazon.com",
+    confidence: 0.88,
+    sources: [
+      { label: "Wikipedia: Amazon", url: "https://en.wikipedia.org/wiki/Amazon_(company)", field: "company" }
+    ]
+  },
+  {
+    aliases: ["apple", "aapl"],
+    companyName: "Apple",
+    employeeEstimate: 164000,
+    revenueEstimateUsd: 383000000000,
+    logoUrl: "https://logo.clearbit.com/apple.com",
+    confidence: 0.9,
+    sources: [
+      { label: "Wikipedia: Apple", url: "https://en.wikipedia.org/wiki/Apple_Inc.", field: "company" }
+    ]
+  },
+  {
+    aliases: ["meta", "facebook", "fb"],
+    companyName: "Meta",
+    employeeEstimate: 67317,
+    revenueEstimateUsd: 135000000000,
+    logoUrl: "https://logo.clearbit.com/meta.com",
+    confidence: 0.87,
+    sources: [
+      { label: "Wikipedia: Meta Platforms", url: "https://en.wikipedia.org/wiki/Meta_Platforms", field: "company" }
+    ]
+  },
+  {
+    aliases: ["netflix", "nflx"],
+    companyName: "Netflix",
+    employeeEstimate: 13000,
+    revenueEstimateUsd: 33700000000,
+    logoUrl: "https://logo.clearbit.com/netflix.com",
+    confidence: 0.85,
+    sources: [
+      { label: "Wikipedia: Netflix", url: "https://en.wikipedia.org/wiki/Netflix", field: "company" }
+    ]
+  },
+  {
+    aliases: ["nvidia", "nvda"],
+    companyName: "Nvidia",
+    employeeEstimate: 29600,
+    revenueEstimateUsd: 60900000000,
+    logoUrl: "https://logo.clearbit.com/nvidia.com",
+    confidence: 0.86,
+    sources: [
+      { label: "Wikipedia: Nvidia", url: "https://en.wikipedia.org/wiki/Nvidia", field: "company" }
+    ]
+  },
+  {
+    aliases: ["shopify", "shop"],
+    companyName: "Shopify",
+    employeeEstimate: 11600,
+    revenueEstimateUsd: 7060000000,
+    logoUrl: "https://logo.clearbit.com/shopify.com",
+    confidence: 0.82,
+    sources: [
+      { label: "Wikipedia: Shopify", url: "https://en.wikipedia.org/wiki/Shopify", field: "company" }
+    ]
+  },
+  {
+    aliases: ["spotify"],
+    companyName: "Spotify",
+    employeeEstimate: 9800,
+    revenueEstimateUsd: 14300000000,
+    logoUrl: "https://logo.clearbit.com/spotify.com",
+    confidence: 0.83,
+    sources: [
+      { label: "Wikipedia: Spotify", url: "https://en.wikipedia.org/wiki/Spotify", field: "company" }
+    ]
+  },
+  {
+    aliases: ["uber"],
+    companyName: "Uber",
+    employeeEstimate: 32800,
+    revenueEstimateUsd: 37300000000,
+    logoUrl: "https://logo.clearbit.com/uber.com",
+    confidence: 0.85,
+    sources: [
+      { label: "Wikipedia: Uber", url: "https://en.wikipedia.org/wiki/Uber", field: "company" }
+    ]
+  },
+  {
+    aliases: ["zoom", "zm"],
+    companyName: "Zoom",
+    employeeEstimate: 7400,
+    revenueEstimateUsd: 4530000000,
+    logoUrl: "https://logo.clearbit.com/zoom.us",
+    confidence: 0.81,
+    sources: [
+      { label: "Wikipedia: Zoom", url: "https://en.wikipedia.org/wiki/Zoom_Video_Communications", field: "company" }
+    ]
+  },
+  {
+    aliases: ["ibm"],
+    companyName: "IBM",
+    employeeEstimate: 282200,
+    revenueEstimateUsd: 61900000000,
+    logoUrl: "https://logo.clearbit.com/ibm.com",
+    confidence: 0.86,
+    sources: [
+      { label: "Wikipedia: IBM", url: "https://en.wikipedia.org/wiki/IBM", field: "company" }
+    ]
   }
 ];
 
@@ -944,8 +1054,8 @@ function onAutocompleteInput() {
   if (!query) { hideAutocomplete(); return; }
 
   const matches = DEFAULT_MOCKS.filter((mock) =>
-    mock.companyName.toLowerCase().startsWith(query) ||
-    mock.aliases.some((a) => a.startsWith(query))
+    mock.companyName.toLowerCase().includes(query) ||
+    mock.aliases.some((a) => a.includes(query))
   );
 
   if (matches.length === 0) { hideAutocomplete(); return; }
@@ -978,8 +1088,8 @@ function showAutocomplete(matches) {
     autocompleteDropdown.appendChild(item);
   });
 
-  /* Position relative to input */
-  const parent = companyNameInput.closest(".input-group") || companyNameInput.parentElement;
+  /* Position relative to search row (not the full input-group, to avoid being cut off by text below) */
+  const parent = companySearchRow || companyNameInput.parentElement;
   parent.style.position = "relative";
   parent.appendChild(autocompleteDropdown);
 }

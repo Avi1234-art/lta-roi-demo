@@ -17,6 +17,9 @@
 
 <body>
 
+    <!-- Ambient floating particles -->
+    <canvas id="ambientCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
+
     <!-- Minimal nav -->
     <nav class="lp-nav" aria-label="Primary">
         <a href="https://persana.ai" target="_blank" rel="noopener noreferrer" class="lp-brand">Persana AI</a>
@@ -168,6 +171,83 @@
                     }
                 });
             }
+        })();
+    </script>
+
+    <!-- Ambient floating particles animation -->
+    <script>
+        (function () {
+            var canvas = document.getElementById("ambientCanvas");
+            if (!canvas) return;
+            var ctx = canvas.getContext("2d");
+            var dots = [];
+            var N = 45;
+            var linkDist = 120;
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            function createDot() {
+                return {
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: 1.2 + Math.random() * 2.2,
+                    vx: (Math.random() - 0.5) * 0.25,
+                    vy: -0.15 - Math.random() * 0.35,
+                    o: 0.12 + Math.random() * 0.28
+                };
+            }
+
+            function init() {
+                resize();
+                dots = [];
+                for (var i = 0; i < N; i++) dots.push(createDot());
+            }
+
+            function frame() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                /* Faint connecting lines between nearby dots */
+                for (var i = 0; i < dots.length; i++) {
+                    for (var j = i + 1; j < dots.length; j++) {
+                        var dx = dots[i].x - dots[j].x;
+                        var dy = dots[i].y - dots[j].y;
+                        var d = Math.sqrt(dx * dx + dy * dy);
+                        if (d < linkDist) {
+                            var alpha = (1 - d / linkDist) * 0.06;
+                            ctx.beginPath();
+                            ctx.moveTo(dots[i].x, dots[i].y);
+                            ctx.lineTo(dots[j].x, dots[j].y);
+                            ctx.strokeStyle = "rgba(220, 159, 133, " + alpha + ")";
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                /* Draw and move dots */
+                for (var k = 0; k < dots.length; k++) {
+                    var p = dots[k];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.y < -20 || p.x < -20 || p.x > canvas.width + 20) {
+                        dots[k] = createDot();
+                        dots[k].y = canvas.height + 10;
+                    }
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+                    ctx.fillStyle = "rgba(220, 159, 133, " + p.o + ")";
+                    ctx.fill();
+                }
+
+                requestAnimationFrame(frame);
+            }
+
+            window.addEventListener("resize", resize);
+            init();
+            frame();
         })();
     </script>
 
