@@ -16,7 +16,7 @@
 
 <body>
   <!-- Page transition overlay with floating dots -->
-  <div class="page-transition" id="pageTransition" style="background:#f7f3ec">
+  <div class="page-transition" id="pageTransition" style="background:#181818">
     <canvas id="transitionCanvas"></canvas>
   </div>
 
@@ -51,83 +51,52 @@
       <h2 id="calculator-heading">Inputs</h2>
 
       <form id="roi-form" novalidate>
-        <div class="lookup-mode-row">
-          <p class="mode-heading">Lookup mode</p>
-          <fieldset class="mode-toggle" aria-label="Lookup mode">
-            <legend class="sr-only">Lookup mode</legend>
-            <label class="mode-option">
-              <input type="radio" name="lookupMode" value="ai" checked />
-              <span>AI Powered</span>
-            </label>
-            <label class="mode-option">
-              <input type="radio" name="lookupMode" value="manual" />
-              <span>Manual</span>
-            </label>
-          </fieldset>
-        </div>
+        <fieldset class="mode-toggle" aria-label="Lookup mode">
+          <legend class="sr-only">Lookup mode</legend>
+          <label class="mode-option">
+            <input type="radio" name="lookupMode" value="ai" checked />
+            <span>AI Powered</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="lookupMode" value="manual" />
+            <span>Manual</span>
+          </label>
+        </fieldset>
 
-        <div class="company-stage">
-          <div class="input-group company-group">
-            <label for="companyName">Company name</label>
-            <div id="companySearchRow" class="inline-input-row">
-              <input id="companyName" name="companyName" type="text" autocomplete="organization"
-                placeholder="Search for Google..." />
-              <button type="button" id="autofillBtn" class="btn-primary hidden">Run AI-powered lookup</button>
-            </div>
-            <p id="lookupStatus" class="field-note" role="status" aria-live="polite">Manual mode is on. Enter values
-              directly.</p>
-            <p id="aiModeNote" class="field-note hidden">
-              AI Powered mode uses Wikidata/Wikipedia via Cloudflare Worker:
-              <a href="https://persana-company-lookup.avi-lta-demo.workers.dev/company-lookup" target="_blank"
-                rel="noopener noreferrer">
-                data source endpoint
-              </a>.
-            </p>
-
-            <section id="lookupMeta" class="lookup-meta hidden" aria-label="Lookup confidence and sources">
-              <div class="lookup-meta-head">
-                <div id="companyLogoWrap" class="company-logo-wrap hidden">
-                  <img id="companyLogo" alt="" loading="lazy" />
-                </div>
-                <div class="lookup-meta-info">
-                  <p id="lookupCompanyName" class="lookup-company-name"></p>
-                  <p id="confidenceBadge" class="confidence-badge">Confidence: not run</p>
-                </div>
-              </div>
-              <details class="sources-toggle">
-                <summary>View sources</summary>
-                <ul id="sourceList" class="source-list">
-                  <li>Run AI-powered lookup to attach source references.</li>
-                </ul>
-              </details>
-            </section>
+        <div class="input-group company-group">
+          <label for="companyName">Company name</label>
+          <div id="companySearchRow" class="inline-input-row">
+            <input id="companyName" name="companyName" type="text" autocomplete="organization"
+              placeholder="Search for Google..." />
+            <button type="button" id="autofillBtn" class="btn-primary hidden">Run AI-powered lookup</button>
           </div>
+          <p id="lookupStatus" class="field-note" role="status" aria-live="polite">Manual mode is on. Enter values
+            directly.</p>
+          <p id="aiModeNote" class="field-note hidden">
+            AI Powered mode uses Wikidata/Wikipedia via Cloudflare Worker:
+            <a href="https://persana-company-lookup.avi-lta-demo.workers.dev/company-lookup" target="_blank"
+              rel="noopener noreferrer">
+              data source endpoint
+            </a>.
+          </p>
 
-          <aside id="livePreview" class="live-preview is-pending" aria-live="polite">
-            <p class="live-preview-kicker">Live snapshot</p>
-            <p class="live-preview-scenario">Scenario: <span id="livePreviewScenario">Low</span></p>
-            <div class="live-preview-grid">
-              <div class="live-preview-metric">
-                <span>ROI</span>
-                <strong id="livePreviewRoi">--</strong>
+          <section id="lookupMeta" class="lookup-meta hidden" aria-label="Lookup confidence and sources">
+            <div class="lookup-meta-head">
+              <div id="companyLogoWrap" class="company-logo-wrap hidden">
+                <img id="companyLogo" alt="" loading="lazy" />
               </div>
-              <div class="live-preview-metric">
-                <span>Payback</span>
-                <strong id="livePreviewPayback">--</strong>
-              </div>
-              <div class="live-preview-metric">
-                <span>Total Benefit</span>
-                <strong id="livePreviewBenefit">--</strong>
-              </div>
-              <div class="live-preview-metric">
-                <span>Net Benefit</span>
-                <strong id="livePreviewNet">--</strong>
+              <div class="lookup-meta-info">
+                <p id="lookupCompanyName" class="lookup-company-name"></p>
+                <p id="confidenceBadge" class="confidence-badge">Confidence: not run</p>
               </div>
             </div>
-            <p id="livePreviewHint" class="live-preview-hint">
-              Press Enter or edit any input to reveal results.
-            </p>
-          </aside>
+            <details class="sources-toggle">
+              <summary>View sources</summary>
+              <ul id="sourceList" class="source-list">
+                <li>Run AI-powered lookup to attach source references.</li>
+              </ul>
+            </details>
+          </section>
         </div>
 
         <div id="coreInputsPanel" class="reveal-panel is-hidden">
@@ -251,14 +220,13 @@
       </div>
     </section>
 
-    <section id="resultsSection" class="section results-section data-gated is-pending" aria-labelledby="results-heading">
+    <section class="section results-section" aria-labelledby="results-heading">
       <div class="results-glow" aria-hidden="true"></div>
       <div class="section-label" aria-hidden="true">
         <span class="rule"></span>
         <span class="label">Results</span>
         <span class="rule"></span>
       </div>
-      <p class="results-awaiting">Press Enter or edit any input to view full results.</p>
       <div class="results-header">
         <div>
           <h2 id="results-heading">Scenario: <span id="activeScenarioName">Low</span></h2>
@@ -327,7 +295,7 @@
       </div>
     </section>
 
-    <section id="chartsSection" class="section charts-section data-gated is-pending" aria-labelledby="charts-heading">
+    <section class="section charts-section" aria-labelledby="charts-heading">
       <div class="section-label" aria-hidden="true">
         <span class="rule"></span>
         <span class="label">Charts</span>
@@ -370,7 +338,7 @@
     </section>
 
     <!-- Compare & export -->
-    <section class="section data-gated is-pending" id="compareSection">
+    <section class="section" id="compareSection">
       <div class="action-bar">
         <button type="button" class="action-btn" id="compareBtn">Compare Companies</button>
         <button type="button" class="action-btn action-btn--accent" id="pdfBtn">Download PDF Report</button>

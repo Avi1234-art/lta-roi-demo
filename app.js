@@ -234,14 +234,6 @@ const companyLogoWrap = document.getElementById("companyLogoWrap");
 const companyLogo = document.getElementById("companyLogo");
 const autoSyncTierCostsCheckbox = document.getElementById("autoSyncTierCosts");
 const lookupCompanyNameEl = document.getElementById("lookupCompanyName");
-const gatedSections = document.querySelectorAll(".data-gated");
-const livePreview = document.getElementById("livePreview");
-const livePreviewScenario = document.getElementById("livePreviewScenario");
-const livePreviewRoi = document.getElementById("livePreviewRoi");
-const livePreviewPayback = document.getElementById("livePreviewPayback");
-const livePreviewBenefit = document.getElementById("livePreviewBenefit");
-const livePreviewNet = document.getElementById("livePreviewNet");
-const livePreviewHint = document.getElementById("livePreviewHint");
 const AI_PLACEHOLDER_COMPANIES = ["Google", "Tesla", "Microsoft", "Salesforce", "HubSpot"];
 const AI_PLACEHOLDER_PREFIX = "Search for ";
 
@@ -265,39 +257,11 @@ let placeholderCompanyIndex = 0;
 let placeholderSuffixCount = 0;
 let placeholderPhase = "typing";
 let placeholderHoldTicks = 0;
-let hasUserTriggeredResults = false;
 let chartInstances = {
   roi: null,
   breakdown: null,
   payback: null
 };
-
-function setResultsVisibility(isReady) {
-  gatedSections.forEach((section) => {
-    section.classList.toggle("is-pending", !isReady);
-    section.classList.toggle("is-ready", isReady);
-  });
-
-  if (livePreview) {
-    livePreview.classList.toggle("is-pending", !isReady);
-    livePreview.classList.toggle("is-ready", isReady);
-  }
-
-  if (livePreviewHint) {
-    livePreviewHint.textContent = isReady
-      ? "Live values update as you edit any field."
-      : "Press Enter or edit any input to reveal results.";
-  }
-}
-
-function primeResultsVisibility() {
-  if (hasUserTriggeredResults) {
-    return;
-  }
-
-  hasUserTriggeredResults = true;
-  setResultsVisibility(true);
-}
 
 function getInputValue(id) {
   const element = document.getElementById(id);
@@ -538,40 +502,14 @@ function renderKpis(result) {
   updateImpactMeter(result.roiPct);
 }
 
-function renderLivePreview(result) {
-  if (!livePreview) {
-    return;
-  }
-
-  if (livePreviewScenario) {
-    livePreviewScenario.textContent = SCENARIO_LABELS[activeScenario];
-  }
-
-  if (livePreviewRoi) {
-    livePreviewRoi.textContent = formatPercent(result.roiPct);
-  }
-
-  if (livePreviewPayback) {
-    livePreviewPayback.textContent = formatMonths(result.paybackMonths);
-  }
-
-  if (livePreviewBenefit) {
-    livePreviewBenefit.textContent = formatCurrency(result.totalBenefitUsd);
-  }
-
-  if (livePreviewNet) {
-    livePreviewNet.textContent = formatCurrency(result.netBenefitUsd);
-  }
-}
-
 function buildChartTheme() {
   return {
-    axis: "#6f807a",
-    accent: "#2f6f5a",
-    accentSecondary: "#43856d",
-    border: "#d6cec2",
-    gridLine: "rgba(123, 138, 134, 0.22)",
-    foreground: "#243331"
+    axis: "#8a7a6e",
+    accent: "#dc9f85",
+    accentSecondary: "#e5ad94",
+    border: "#35211a",
+    gridLine: "rgba(53, 33, 26, 0.25)",
+    foreground: "#e8ddd0"
   };
 }
 
@@ -611,10 +549,10 @@ function createOrUpdateCharts(resultsByScenario) {
   const chartFont = { family: "'Inter', system-ui, sans-serif" };
 
   const tooltipStyle = {
-    backgroundColor: "#ffffff",
-    titleColor: "#25312f",
-    bodyColor: "#586864",
-    borderColor: "#d6cec2",
+    backgroundColor: "#1e1e1e",
+    titleColor: "#e8ddd0",
+    bodyColor: "#b6a596",
+    borderColor: "#35211a",
     borderWidth: 1,
     cornerRadius: 8,
     padding: 10,
@@ -795,12 +733,8 @@ function recalculate() {
   validateMainInputs();
 
   const resultsByScenario = computeAllScenarios();
-  renderLivePreview(resultsByScenario[activeScenario]);
   renderKpis(resultsByScenario[activeScenario]);
-
-  if (hasUserTriggeredResults) {
-    createOrUpdateCharts(resultsByScenario);
-  }
+  createOrUpdateCharts(resultsByScenario);
 }
 
 function clamp(value, min, max) {
@@ -925,7 +859,6 @@ function applyLookupResult(data) {
     syncScenarioCostsFromTier();
   }
 
-  primeResultsVisibility();
   hasAiLookupData = true;
   setCoreInputsVisible(true);
   lookupMeta.classList.remove("hidden");
@@ -1103,7 +1036,6 @@ async function onAutofillClicked() {
     return;
   }
 
-  primeResultsVisibility();
   autofillButton.disabled = true;
   lookupStatus.textContent = "Looking up company data...";
 
@@ -1133,7 +1065,6 @@ async function onAutofillClicked() {
 }
 
 function onScenarioButtonClick(event) {
-  primeResultsVisibility();
   activeScenario = event.currentTarget.dataset.scenario;
   renderScenarioSelector();
   recalculate();
@@ -1146,11 +1077,6 @@ function onLookupModeChanged(event) {
 
 function onInputChanged(event) {
   const { id } = event.target;
-  const isLookupModeControl = event.target.name === "lookupMode";
-
-  if (!isLookupModeControl) {
-    primeResultsVisibility();
-  }
 
   if (
     id === "companySizeEmployees" ||
@@ -1493,35 +1419,35 @@ async function exportPdf() {
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
 
-    /* Light background */
-    doc.setFillColor(247, 243, 236);
+    /* Dark background */
+    doc.setFillColor(24, 24, 24);
     doc.rect(0, 0, pageWidth, pageHeight, "F");
 
     /* Header */
-    doc.setTextColor(31, 42, 42);
+    doc.setTextColor(232, 221, 208);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.text("Persana AI", 20, 25);
     doc.setFontSize(14);
-    doc.setTextColor(88, 104, 100);
+    doc.setTextColor(182, 165, 150);
     doc.text("ROI Analysis Report", 20, 34);
 
     /* Company + date */
     const companyName = lookupCompanyNameEl?.textContent || "Company";
     const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
     doc.setFontSize(10);
-    doc.setTextColor(123, 138, 134);
+    doc.setTextColor(154, 125, 110);
     doc.text(`${companyName} \u2014 ${date}`, 20, 42);
     doc.text(`Scenario: ${SCENARIO_LABELS[activeScenario]}`, 20, 48);
 
     /* Divider */
-    doc.setDrawColor(214, 206, 194);
+    doc.setDrawColor(53, 33, 26);
     doc.line(20, 53, pageWidth - 20, 53);
 
     /* KPI summary */
     const result = computeScenarioOutput(activeScenario);
     doc.setFontSize(12);
-    doc.setTextColor(47, 111, 90);
+    doc.setTextColor(220, 159, 133);
     doc.text("Key Metrics", 20, 63);
 
     const kpis = [
@@ -1538,27 +1464,27 @@ async function exportPdf() {
     doc.setFontSize(10);
     let yPos = 72;
     kpis.forEach(([label, value]) => {
-      doc.setTextColor(88, 104, 100);
+      doc.setTextColor(182, 165, 150);
       doc.text(label, 24, yPos);
-      doc.setTextColor(31, 42, 42);
+      doc.setTextColor(232, 221, 208);
       doc.text(value, pageWidth - 24, yPos, { align: "right" });
       yPos += 7;
     });
 
     /* Charts screenshot */
     yPos += 5;
-    doc.setDrawColor(214, 206, 194);
+    doc.setDrawColor(53, 33, 26);
     doc.line(20, yPos, pageWidth - 20, yPos);
     yPos += 8;
 
     doc.setFontSize(12);
-    doc.setTextColor(47, 111, 90);
+    doc.setTextColor(220, 159, 133);
     doc.text("Scenario Comparison Charts", 20, yPos);
     yPos += 6;
 
     const chartsGrid = document.querySelector(".charts-grid");
     if (chartsGrid) {
-      const canvas = await window.html2canvas(chartsGrid, { backgroundColor: "#f7f3ec", scale: 2 });
+      const canvas = await window.html2canvas(chartsGrid, { backgroundColor: "#181818", scale: 2 });
       const imgData = canvas.toDataURL("image/png");
       const imgWidth = pageWidth - 40;
       const imgHeight = (canvas.height / canvas.width) * imgWidth;
@@ -1567,7 +1493,7 @@ async function exportPdf() {
 
     /* Footer */
     doc.setFontSize(8);
-    doc.setTextColor(123, 138, 134);
+    doc.setTextColor(154, 125, 110);
     doc.text("Generated by Persana AI ROI Calculator \u2014 persana.ai", pageWidth / 2, pageHeight - 12, { align: "center" });
 
     doc.save(`Persana_ROI_${companyName.replace(/\s+/g, "_")}_${activeScenario}.pdf`);
@@ -1593,12 +1519,9 @@ function registerEventHandlers() {
   companyNameInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      primeResultsVisibility();
       hideAutocomplete();
       if (lookupMode === "ai" && companyNameInput.value.trim()) {
         onAutofillClicked();
-      } else {
-        recalculate();
       }
     }
     if (e.key === "Escape") hideAutocomplete();
@@ -1631,7 +1554,6 @@ function registerEventHandlers() {
 
 function init() {
   lookupMode = document.querySelector("input[name='lookupMode']:checked")?.value || "manual";
-  setResultsVisibility(false);
   renderScenarioSelector();
   syncScenarioCostsFromTier();
   registerEventHandlers();
