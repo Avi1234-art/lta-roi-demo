@@ -48,9 +48,9 @@
 
         <div class="input-group company-group">
           <label for="companyName">Company name</label>
-          <div class="inline-input-row">
-            <input id="companyName" name="companyName" type="text" autocomplete="organization" placeholder="Example: HubSpot" />
-            <button type="button" id="autofillBtn" class="btn-primary">Run AI-powered lookup</button>
+          <div id="companySearchRow" class="inline-input-row">
+            <input id="companyName" name="companyName" type="text" autocomplete="organization" placeholder="Search for Google..." />
+            <button type="button" id="autofillBtn" class="btn-primary hidden">Run AI-powered lookup</button>
           </div>
           <p id="lookupStatus" class="field-note" role="status" aria-live="polite">Manual mode is on. Enter values directly.</p>
           <p id="aiModeNote" class="field-note hidden">
@@ -85,15 +85,6 @@
           <summary>Advanced assumptions (editable)</summary>
 
           <div class="advanced-grid">
-            <div class="input-group preconfigured-note">
-              <p class="field-note">
-                Cloudflare Worker is preconfigured for this demo:
-                <a href="https://persana-company-lookup.avi-lta-demo.workers.dev/company-lookup" target="_blank" rel="noopener noreferrer">
-                  /company-lookup
-                </a>
-              </p>
-            </div>
-
             <div class="input-group checkbox-row">
               <input id="autoSyncTierCosts" name="autoSyncTierCosts" type="checkbox" checked />
               <label for="autoSyncTierCosts">Auto-sync Persana cost by company-size tier</label>

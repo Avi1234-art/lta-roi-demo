@@ -220,12 +220,10 @@ label {
 
 .mode-toggle {
   margin: 0 0 1rem;
-  padding: 0.3rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  padding: 0;
+  border: 0;
   display: inline-flex;
-  gap: 0.35rem;
-  background: var(--muted);
+  gap: 0.55rem;
 }
 
 .mode-option {
@@ -243,9 +241,10 @@ label {
 }
 
 .mode-option span {
-  min-width: 120px;
+  min-width: 128px;
   min-height: 44px;
-  border-radius: 999px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -253,12 +252,14 @@ label {
   color: var(--muted-foreground);
   font-weight: 600;
   letter-spacing: 0.05em;
-  transition: background-color 200ms ease-out, color 200ms ease-out, box-shadow 200ms ease-out;
+  background: var(--card);
+  transition: background-color 200ms ease-out, color 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out;
 }
 
 .mode-option input:checked + span {
   color: var(--foreground);
-  background: var(--card);
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(212, 168, 75, 0.24), rgba(212, 168, 75, 0.08));
   box-shadow: var(--shadow-sm);
 }
 
@@ -271,8 +272,12 @@ label {
 .inline-input-row {
   display: grid;
   gap: 0.75rem;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr;
   align-items: start;
+}
+
+.inline-input-row.with-action {
+  grid-template-columns: 1fr auto;
 }
 
 .btn-primary {
@@ -340,13 +345,8 @@ label {
 .advanced-grid {
   margin-top: 1rem;
   display: grid;
-  grid-template-columns: 1.3fr 0.7fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
-}
-
-.preconfigured-note {
-  display: flex;
-  align-items: center;
 }
 
 .checkbox-row {
@@ -354,7 +354,7 @@ label {
   align-items: center;
   gap: 0.5rem;
   min-height: 44px;
-  margin-top: 1.8rem;
+  margin-top: 0;
 }
 
 .checkbox-row label {

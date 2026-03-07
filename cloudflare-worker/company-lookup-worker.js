@@ -172,11 +172,7 @@ async function fetchWikipediaTitle(companyName) {
   endpoint.searchParams.set("namespace", "0");
   endpoint.searchParams.set("format", "json");
 
-  const response = await fetch(endpoint.toString(), {
-    headers: {
-      "User-Agent": "persana-roi-demo/1.0"
-    }
-  });
+  const response = await fetch(endpoint.toString());
 
   if (!response.ok) {
     return null;
@@ -190,30 +186,17 @@ async function fetchWikipediaTitle(companyName) {
   return payload[1][0];
 }
 
-async function fetchLiveWikidata(companyName) {
-  const title = await fetchWikipediaTitle(companyName);
-  if (!title) {
-    return null;
-  }
-
-  const summaryResponse = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
-  if (!summaryResponse.ok) {
-    return null;
-  }
-
-  const summary = await summaryResponse.json();
-  const wikidataId = summary?.wikibase_item;
-  if (!wikidataId) {
-    return null;
-  }
-
+async function fetchEntity(wikidataId) {
   const entityResponse = await fetch(`https://www.wikidata.org/wiki/Special:EntityData/${wikidataId}.json`);
   if (!entityResponse.ok) {
     return null;
   }
 
   const entityPayload = await entityResponse.json();
-  const entity = entityPayload?.entities?.[wikidataId];
+  return entityPayload?.entities?.[wikidataId] || null;
+}
+
+function buildLiveResultFromEntity(entity, wikidataId, companyName, summaryUrl) {
   if (!entity) {
     return null;
   }
@@ -233,16 +216,20 @@ async function fetchLiveWikidata(companyName) {
     confidence += 0.25;
   }
 
+  const title = entity?.labels?.en?.value || companyName;
+  const wikipediaSlug = entity?.sitelinks?.enwiki?.title;
+  const wikipediaUrl = summaryUrl || (wikipediaSlug ? `https://en.wikipedia.org/wiki/${encodeURIComponent(wikipediaSlug)}` : null);
+
   return {
-    companyName: summary?.title || companyName,
+    companyName: title,
     employeeEstimate: employeeEstimate || null,
     employeeRangeLabel: employeeRangeLabel(employeeEstimate || 0),
     revenueEstimateUsd: revenueEstimateUsd || null,
     confidence: Math.min(0.95, confidence),
     sources: [
       {
-        label: `Wikipedia: ${summary?.title || companyName}`,
-        url: summary?.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`,
+        label: `Wikipedia: ${title}`,
+        url: wikipediaUrl || "https://en.wikipedia.org/wiki/Main_Page",
         field: "company"
       },
       {
@@ -253,6 +240,64 @@ async function fetchLiveWikidata(companyName) {
     ],
     usedMock: false
   };
+}
+
+async function fetchWikidataSearchCandidates(companyName) {
+  const endpoint = new URL("https://www.wikidata.org/w/api.php");
+  endpoint.searchParams.set("action", "wbsearchentities");
+  endpoint.searchParams.set("search", companyName);
+  endpoint.searchParams.set("language", "en");
+  endpoint.searchParams.set("format", "json");
+  endpoint.searchParams.set("limit", "6");
+  endpoint.searchParams.set("type", "item");
+
+  const response = await fetch(endpoint.toString());
+  if (!response.ok) {
+    return [];
+  }
+
+  const payload = await response.json();
+  return Array.isArray(payload?.search) ? payload.search : [];
+}
+
+async function fetchLiveWikidata(companyName) {
+  const title = await fetchWikipediaTitle(companyName);
+  if (title) {
+    const summaryResponse = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+    if (summaryResponse.ok) {
+      const summary = await summaryResponse.json();
+      const wikidataId = summary?.wikibase_item;
+      if (wikidataId) {
+        const entity = await fetchEntity(wikidataId);
+        const result = buildLiveResultFromEntity(
+          entity,
+          wikidataId,
+          summary?.title || companyName,
+          summary?.content_urls?.desktop?.page || null
+        );
+
+        if (result) {
+          return result;
+        }
+      }
+    }
+  }
+
+  const candidates = await fetchWikidataSearchCandidates(companyName);
+  for (const candidate of candidates) {
+    const candidateId = candidate?.id;
+    if (!candidateId) {
+      continue;
+    }
+
+    const entity = await fetchEntity(candidateId);
+    const result = buildLiveResultFromEntity(entity, candidateId, candidate?.label || companyName, null);
+    if (result) {
+      return result;
+    }
+  }
+
+  return null;
 }
 
 export default {

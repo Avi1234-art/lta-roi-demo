@@ -69,6 +69,8 @@ const DEFAULT_MOCKS = [
 
 const form = document.getElementById("roi-form");
 const scenarioButtons = document.querySelectorAll(".scenario-btn");
+const companySearchRow = document.getElementById("companySearchRow");
+const companyNameInput = document.getElementById("companyName");
 const autofillButton = document.getElementById("autofillBtn");
 const lookupModeInputs = document.querySelectorAll("input[name='lookupMode']");
 const lookupStatus = document.getElementById("lookupStatus");
@@ -76,6 +78,8 @@ const aiModeNote = document.getElementById("aiModeNote");
 const sourceList = document.getElementById("sourceList");
 const confidenceBadge = document.getElementById("confidenceBadge");
 const autoSyncTierCostsCheckbox = document.getElementById("autoSyncTierCosts");
+const AI_PLACEHOLDER_COMPANIES = ["Google", "Tesla", "Microsoft", "Salesforce", "HubSpot"];
+const AI_PLACEHOLDER_PREFIX = "Search for ";
 
 const outputNodes = {
   activeScenarioName: document.getElementById("activeScenarioName"),
@@ -91,6 +95,11 @@ const outputNodes = {
 
 let activeScenario = "low";
 let lookupMode = "manual";
+let placeholderTicker = null;
+let placeholderCompanyIndex = 0;
+let placeholderLetterCount = 0;
+let placeholderPhase = "typing";
+let placeholderHoldTicks = 0;
 let chartInstances = {
   roi: null,
   breakdown: null,
@@ -534,21 +543,83 @@ function applyLookupResult(data) {
   });
 }
 
+function tickPlaceholderAnimation() {
+  if (lookupMode !== "ai") {
+    return;
+  }
+
+  if (document.activeElement === companyNameInput || companyNameInput.value.trim()) {
+    return;
+  }
+
+  const company = AI_PLACEHOLDER_COMPANIES[placeholderCompanyIndex];
+
+  if (placeholderPhase === "typing") {
+    placeholderLetterCount += 1;
+    if (placeholderLetterCount >= company.length) {
+      placeholderLetterCount = company.length;
+      placeholderPhase = "hold";
+      placeholderHoldTicks = 0;
+    }
+  } else if (placeholderPhase === "hold") {
+    placeholderHoldTicks += 1;
+    if (placeholderHoldTicks >= 10) {
+      placeholderPhase = "deleting";
+    }
+  } else {
+    placeholderLetterCount -= 1;
+    if (placeholderLetterCount <= 0) {
+      placeholderLetterCount = 0;
+      placeholderPhase = "typing";
+      placeholderCompanyIndex = (placeholderCompanyIndex + 1) % AI_PLACEHOLDER_COMPANIES.length;
+    }
+  }
+
+  const typedCompany = company.slice(0, placeholderLetterCount);
+  companyNameInput.placeholder = `${AI_PLACEHOLDER_PREFIX}${typedCompany}${typedCompany ? "..." : ""}`;
+}
+
+function startPlaceholderAnimation() {
+  if (placeholderTicker) {
+    return;
+  }
+
+  placeholderCompanyIndex = 0;
+  placeholderLetterCount = 0;
+  placeholderPhase = "typing";
+  placeholderHoldTicks = 0;
+  placeholderTicker = window.setInterval(tickPlaceholderAnimation, 110);
+}
+
+function stopPlaceholderAnimation() {
+  if (!placeholderTicker) {
+    return;
+  }
+
+  window.clearInterval(placeholderTicker);
+  placeholderTicker = null;
+}
+
 function updateLookupModeUI() {
   const aiMode = lookupMode === "ai";
+  autofillButton.classList.toggle("hidden", !aiMode);
   autofillButton.disabled = !aiMode;
+  companySearchRow.classList.toggle("with-action", aiMode);
   aiModeNote.classList.toggle("hidden", !aiMode);
 
   if (aiMode) {
     lookupStatus.textContent = "AI Powered mode is on. Run lookup to pull company size and revenue estimate.";
     confidenceBadge.textContent = "Confidence: not run";
     sourceList.innerHTML = "<li>Run AI-powered lookup to attach source references.</li>";
+    startPlaceholderAnimation();
     return;
   }
 
   lookupStatus.textContent = "Manual mode is on. Enter values directly.";
   confidenceBadge.textContent = "Confidence: manual mode";
   sourceList.innerHTML = "<li>Manual mode selected. Data sourcing is disabled.</li>";
+  companyNameInput.placeholder = "Company name (optional in Manual mode)";
+  stopPlaceholderAnimation();
 }
 
 function employeeRangeLabel(value) {
@@ -589,7 +660,9 @@ async function onAutofillClicked() {
     }
 
     applyLookupResult(result);
-    lookupStatus.textContent = `Loaded data for ${result.companyName || companyName}.`;
+    lookupStatus.textContent = result.usedMock
+      ? `Loaded fallback profile for ${result.companyName || companyName}.`
+      : `Loaded live public data for ${result.companyName || companyName}.`;
     recalculate();
   } catch (error) {
     const fallback = findDemoMock(companyName) || deterministicFallback(companyName);
@@ -655,6 +728,7 @@ function init() {
   syncScenarioCostsFromTier();
   registerEventHandlers();
   updateLookupModeUI();
+  tickPlaceholderAnimation();
   recalculate();
 }
 
