@@ -2,293 +2,84 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Persana ROI Calculator</title>
-  <meta name="description" content="Interactive ROI calculator demo for Persana sales conversations." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@400;500;600&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="/lta-roi-demo/styles.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Persana AI — ROI Calculator</title>
+    <meta name="description"
+        content="See how Persana AI can accelerate your sales pipeline. Calculate your team's potential ROI in seconds." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="/lta-roi-demo/landing.css" />
 </head>
 
 <body>
-  <div class="ambient-glow" aria-hidden="true"></div>
-  <main class="page-shell">
-    <header class="hero section">
-      <div class="section-label" aria-hidden="true">
-        <span class="rule"></span>
-        <span class="label">Sales Enablement</span>
-        <span class="rule"></span>
-      </div>
-      <h1>Persana ROI Calculator</h1>
-      <p class="hero-copy">
-        Enter a prospect, auto-fill public company context, and walk through Low, Base, and High outcomes during live
-        sales conversations.
-      </p>
+
+    <!-- Minimal nav -->
+    <nav class="lp-nav" aria-label="Primary">
+        <span class="lp-brand">PA—PROTOCOL 01</span>
+        <span class="lp-nav-line" aria-hidden="true"></span>
+        <span class="lp-nav-status">ROI PREVIEW</span>
+    </nav>
+
+    <!-- Hero -->
+    <header class="lp-hero">
+        <div class="lp-hero-label">
+            <span class="lp-label-line" aria-hidden="true"></span>
+            <span class="lp-label-text">Sales Intelligence</span>
+        </div>
+
+        <div class="lp-headline-wrap" aria-label="Persana AI">
+            <span class="lp-headline-ghost" aria-hidden="true">PERSANA</span>
+            <h1 class="lp-headline">PERSANA</h1>
+        </div>
+
+        <p class="lp-hero-sub">AI-Powered Sales Enablement</p>
     </header>
 
-    <section class="card section" aria-labelledby="calculator-heading">
-      <div class="section-label" aria-hidden="true">
-        <span class="rule"></span>
-        <span class="label">Calculator</span>
-        <span class="rule"></span>
-      </div>
-      <h2 id="calculator-heading">Inputs</h2>
+    <!-- Bottom grid -->
+    <div class="lp-divider" aria-hidden="true"></div>
 
-      <form id="roi-form" novalidate>
-        <fieldset class="mode-toggle" aria-label="Lookup mode">
-          <legend class="sr-only">Lookup mode</legend>
-          <label class="mode-option">
-            <input type="radio" name="lookupMode" value="ai" checked />
-            <span>AI Powered</span>
-          </label>
-          <label class="mode-option">
-            <input type="radio" name="lookupMode" value="manual" />
-            <span>Manual</span>
-          </label>
-        </fieldset>
+    <section class="lp-bottom">
+        <div class="lp-bottom-grid">
 
-        <div class="input-group company-group">
-          <label for="companyName">Company name</label>
-          <div id="companySearchRow" class="inline-input-row">
-            <input id="companyName" name="companyName" type="text" autocomplete="organization"
-              placeholder="Search for Google..." />
-            <button type="button" id="autofillBtn" class="btn-primary hidden">Run AI-powered lookup</button>
-          </div>
-          <p id="lookupStatus" class="field-note" role="status" aria-live="polite">Manual mode is on. Enter values
-            directly.</p>
-          <p id="aiModeNote" class="field-note hidden">
-            AI Powered mode uses Wikidata/Wikipedia via Cloudflare Worker:
-            <a href="https://persana-company-lookup.avi-lta-demo.workers.dev/company-lookup" target="_blank"
-              rel="noopener noreferrer">
-              data source endpoint
-            </a>.
-          </p>
-
-          <section id="lookupMeta" class="lookup-meta hidden" aria-label="Lookup confidence and sources">
-            <div class="lookup-meta-head">
-              <div id="companyLogoWrap" class="company-logo-wrap hidden">
-                <img id="companyLogo" alt="" loading="lazy" />
-              </div>
-              <div class="lookup-meta-info">
-                <p id="lookupCompanyName" class="lookup-company-name"></p>
-                <p id="confidenceBadge" class="confidence-badge">Confidence: not run</p>
-              </div>
+            <!-- Left: Value statement -->
+            <div class="lp-value-col">
+                <p class="lp-value-text">
+                    Discover the precise revenue impact Persana AI delivers for your sales
+                    team. Walk through Low, Base & High scenarios calibrated to your
+                    company's real data — employee count, tooling spend, and pipeline
+                    volume — to quantify time savings, tool consolidation, and conversion
+                    lift in one view.
+                </p>
+                <div class="lp-status-indicator">
+                    <span class="lp-status-dot" aria-hidden="true"></span>
+                    <span class="lp-status-label">Live Calculator Available</span>
+                </div>
             </div>
-            <details class="sources-toggle">
-              <summary>View sources</summary>
-              <ul id="sourceList" class="source-list">
-                <li>Run AI-powered lookup to attach source references.</li>
-              </ul>
-            </details>
-          </section>
+
+            <!-- Right: CTA block -->
+            <div class="lp-cta-col">
+                <h2 class="lp-cta-heading">See how Persana AI can impact your pipeline</h2>
+                <p class="lp-cta-desc">
+                    Enter your prospect company, auto-fill public context, and instantly
+                    see ROI across three scenarios — built for live sales conversations.
+                </p>
+                <a href="/lta-roi-demo/calculator.html" class="lp-cta-btn" id="launchCalcBtn">
+                    Launch ROI Calculator
+                    <span class="lp-cta-arrow" aria-hidden="true">→</span>
+                </a>
+                <p class="lp-cta-caption">No signup required. Instant results.</p>
+            </div>
+
         </div>
-
-        <div id="coreInputsPanel" class="reveal-panel is-hidden">
-          <div class="input-grid">
-            <div class="input-group">
-              <label for="companySizeEmployees">Company size (employees)</label>
-              <input id="companySizeEmployees" name="companySizeEmployees" type="number" min="1" step="1" value="250"
-                required />
-              <p id="companySizeEmployeesError" class="field-error" aria-live="polite"></p>
-            </div>
-
-            <div class="input-group">
-              <label for="currentToolingAnnualUsd">Current tooling spend (USD / year)</label>
-              <input id="currentToolingAnnualUsd" name="currentToolingAnnualUsd" type="number" min="0" step="1000"
-                value="90000" required />
-              <p id="currentToolingAnnualUsdError" class="field-error" aria-live="polite"></p>
-            </div>
-
-            <div class="input-group">
-              <label for="salesVolumeAnnualUsd">Sales volume (USD / year)</label>
-              <input id="salesVolumeAnnualUsd" name="salesVolumeAnnualUsd" type="number" min="0" step="10000"
-                value="5000000" required />
-              <p id="salesVolumeAnnualUsdError" class="field-error" aria-live="polite"></p>
-            </div>
-          </div>
-        </div>
-
-        <details class="advanced-panel" id="advancedAssumptions">
-          <summary>Advanced assumptions (editable)</summary>
-
-          <div class="advanced-grid">
-            <div class="input-group checkbox-row">
-              <input id="autoSyncTierCosts" name="autoSyncTierCosts" type="checkbox" checked />
-              <label for="autoSyncTierCosts">Auto-sync Persana cost by company-size tier</label>
-            </div>
-          </div>
-
-          <h3>Tier cost defaults (USD / year)</h3>
-          <div class="input-grid tiers-grid">
-            <div class="input-group">
-              <label for="tierSmbCostUsd">SMB (1-200)</label>
-              <input id="tierSmbCostUsd" type="number" min="0" step="1000" value="36000" />
-            </div>
-            <div class="input-group">
-              <label for="tierMidCostUsd">Mid-market (201-1000)</label>
-              <input id="tierMidCostUsd" type="number" min="0" step="1000" value="120000" />
-            </div>
-            <div class="input-group">
-              <label for="tierEntCostUsd">Enterprise (1001+)</label>
-              <input id="tierEntCostUsd" type="number" min="0" step="1000" value="400000" />
-            </div>
-          </div>
-
-          <h3>Scenario assumptions</h3>
-          <div class="table-scroll">
-            <table class="assumptions-table">
-              <thead>
-                <tr>
-                  <th>Scenario</th>
-                  <th>Time saved <button type="button" class="info-dot"
-                      data-help="Estimated weekly hours saved per sales rep by using Persana workflows and automation."
-                      aria-label="Time saved help">i</button><br />(hrs/rep/week)</th>
-                  <th>Conversion lift <button type="button" class="info-dot"
-                      data-help="Expected percentage increase in conversion from existing sales volume due to better targeting and execution."
-                      aria-label="Conversion lift help">i</button><br />(%)</th>
-                  <th>Tools replaced <button type="button" class="info-dot"
-                      data-help="Share of current tooling spend that Persana can replace or consolidate."
-                      aria-label="Tools replaced help">i</button><br />(%)</th>
-                  <th>Persana annual cost <button type="button" class="info-dot"
-                      data-help="Annual platform cost used for ROI and payback calculations in this scenario."
-                      aria-label="Persana annual cost help">i</button><br />(USD)</th>
-                  <th>Rep ratio <button type="button" class="info-dot"
-                      data-help="Estimated number of sales reps per company employee used to derive rep count from company size."
-                      aria-label="Rep ratio help">i</button><br />(reps per employee)</th>
-                  <th>Rep loaded cost <button type="button" class="info-dot"
-                      data-help="Fully loaded annual cost per sales rep, including salary and overhead."
-                      aria-label="Rep loaded cost help">i</button><br />(USD/year)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Low</td>
-                  <td><input id="low-timeSavedHoursPerRepPerWeek" type="number" min="0" step="0.1" value="2" /></td>
-                  <td><input id="low-conversionLiftPct" type="number" min="0" step="0.1" value="3" /></td>
-                  <td><input id="low-toolsReplacedPct" type="number" min="0" max="100" step="1" value="30" /></td>
-                  <td><input id="low-persanaAnnualCostUsd" type="number" min="0" step="1000" value="36000" /></td>
-                  <td><input id="low-repCountRatio" type="number" min="0" step="0.001" value="0.001" /></td>
-                  <td><input id="low-repFullyLoadedAnnualUsd" type="number" min="0" step="1000" value="130000" /></td>
-                </tr>
-                <tr>
-                  <td>Base</td>
-                  <td><input id="base-timeSavedHoursPerRepPerWeek" type="number" min="0" step="0.1" value="4" /></td>
-                  <td><input id="base-conversionLiftPct" type="number" min="0" step="0.1" value="7" /></td>
-                  <td><input id="base-toolsReplacedPct" type="number" min="0" max="100" step="1" value="50" /></td>
-                  <td><input id="base-persanaAnnualCostUsd" type="number" min="0" step="1000" value="120000" /></td>
-                  <td><input id="base-repCountRatio" type="number" min="0" step="0.001" value="0.002" /></td>
-                  <td><input id="base-repFullyLoadedAnnualUsd" type="number" min="0" step="1000" value="150000" /></td>
-                </tr>
-                <tr>
-                  <td>High</td>
-                  <td><input id="high-timeSavedHoursPerRepPerWeek" type="number" min="0" step="0.1" value="6" /></td>
-                  <td><input id="high-conversionLiftPct" type="number" min="0" step="0.1" value="12" /></td>
-                  <td><input id="high-toolsReplacedPct" type="number" min="0" max="100" step="1" value="70" /></td>
-                  <td><input id="high-persanaAnnualCostUsd" type="number" min="0" step="1000" value="400000" /></td>
-                  <td><input id="high-repCountRatio" type="number" min="0" step="0.001" value="0.003" /></td>
-                  <td><input id="high-repFullyLoadedAnnualUsd" type="number" min="0" step="1000" value="170000" /></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </details>
-      </form>
     </section>
 
-    <section class="section">
-      <div class="scenario-switch" role="tablist" aria-label="Scenario selector">
-        <button type="button" class="scenario-btn is-active" data-scenario="low" role="tab"
-          aria-selected="true">Low</button>
-        <button type="button" class="scenario-btn" data-scenario="base" role="tab" aria-selected="false">Base</button>
-        <button type="button" class="scenario-btn" data-scenario="high" role="tab" aria-selected="false">High</button>
-      </div>
-    </section>
+    <!-- Ambient grain overlay -->
+    <div class="lp-grain" aria-hidden="true"></div>
 
-    <section class="section" aria-labelledby="results-heading">
-      <div class="section-label" aria-hidden="true">
-        <span class="rule"></span>
-        <span class="label">Results</span>
-        <span class="rule"></span>
-      </div>
-      <h2 id="results-heading">Scenario: <span id="activeScenarioName">Low</span></h2>
-
-      <div class="kpi-grid">
-        <article class="kpi-card">
-          <h3>ROI</h3>
-          <p id="kpiRoiPct" class="kpi-value">0%</p>
-        </article>
-        <article class="kpi-card">
-          <h3>Payback</h3>
-          <p id="kpiPaybackMonths" class="kpi-value">0 months</p>
-        </article>
-        <article class="kpi-card">
-          <h3>Total benefit</h3>
-          <p id="kpiTotalBenefit" class="kpi-value">$0</p>
-        </article>
-        <article class="kpi-card">
-          <h3>Net benefit</h3>
-          <p id="kpiNetBenefit" class="kpi-value">$0</p>
-        </article>
-      </div>
-
-      <div class="kpi-grid breakdown-grid">
-        <article class="kpi-card compact">
-          <h3>Time savings value</h3>
-          <p id="activeTimeSavings" class="kpi-subvalue">$0</p>
-        </article>
-        <article class="kpi-card compact">
-          <h3>Tool consolidation savings</h3>
-          <p id="activeToolSavings" class="kpi-subvalue">$0</p>
-        </article>
-        <article class="kpi-card compact">
-          <h3>Revenue lift estimate</h3>
-          <p id="activeRevenueLift" class="kpi-subvalue">$0</p>
-        </article>
-        <article class="kpi-card compact">
-          <h3>Persana annual cost</h3>
-          <p id="activePersanaCost" class="kpi-subvalue">$0</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="section charts-section" aria-labelledby="charts-heading">
-      <div class="section-label" aria-hidden="true">
-        <span class="rule"></span>
-        <span class="label">Charts</span>
-        <span class="rule"></span>
-      </div>
-      <h2 id="charts-heading">Low / Base / High comparison</h2>
-
-      <div class="charts-grid">
-        <article class="chart-card">
-          <h3>ROI by scenario</h3>
-          <div class="chart-wrap">
-            <canvas id="roiChart" aria-label="ROI by scenario" role="img"></canvas>
-          </div>
-        </article>
-        <article class="chart-card">
-          <h3>Benefit breakdown</h3>
-          <div class="chart-wrap">
-            <canvas id="breakdownChart" aria-label="Benefit breakdown by scenario" role="img"></canvas>
-          </div>
-        </article>
-        <article class="chart-card">
-          <h3>Payback period</h3>
-          <div class="chart-wrap">
-            <canvas id="paybackChart" aria-label="Payback months by scenario" role="img"></canvas>
-          </div>
-        </article>
-      </div>
-    </section>
-
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
-  <script src="/lta-roi-demo/app.js" defer></script>
 </body>
 
 </html>
