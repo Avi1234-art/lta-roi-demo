@@ -34,13 +34,31 @@
       <h2 id="calculator-heading">Inputs</h2>
 
       <form id="roi-form" novalidate>
+        <fieldset class="mode-toggle" aria-label="Lookup mode">
+          <legend class="sr-only">Lookup mode</legend>
+          <label class="mode-option">
+            <input type="radio" name="lookupMode" value="manual" checked />
+            <span>Manual</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="lookupMode" value="ai" />
+            <span>AI Powered</span>
+          </label>
+        </fieldset>
+
         <div class="input-group company-group">
           <label for="companyName">Company name</label>
           <div class="inline-input-row">
             <input id="companyName" name="companyName" type="text" autocomplete="organization" placeholder="Example: HubSpot" />
-            <button type="button" id="autofillBtn" class="btn-primary">Auto-fill</button>
+            <button type="button" id="autofillBtn" class="btn-primary">Run AI-powered lookup</button>
           </div>
-          <p id="lookupStatus" class="field-note" role="status" aria-live="polite">Optional: use auto-fill to pull size and revenue estimate.</p>
+          <p id="lookupStatus" class="field-note" role="status" aria-live="polite">Manual mode is on. Enter values directly.</p>
+          <p id="aiModeNote" class="field-note hidden">
+            AI Powered mode uses Wikidata/Wikipedia via Cloudflare Worker:
+            <a href="https://persana-company-lookup.avi-lta-demo.workers.dev/company-lookup" target="_blank" rel="noopener noreferrer">
+              data source endpoint
+            </a>.
+          </p>
         </div>
 
         <div class="input-grid">
@@ -67,16 +85,13 @@
           <summary>Advanced assumptions (editable)</summary>
 
           <div class="advanced-grid">
-            <div class="input-group">
-              <label for="workerUrl">Cloudflare Worker URL</label>
-              <input
-                id="workerUrl"
-                name="workerUrl"
-                type="url"
-                value=""
-                placeholder="https://your-worker.your-subdomain.workers.dev/company-lookup"
-              />
-              <p class="field-note">If empty, the calculator uses deterministic demo fallback data.</p>
+            <div class="input-group preconfigured-note">
+              <p class="field-note">
+                Cloudflare Worker is preconfigured for this demo:
+                <a href="https://persana-company-lookup.avi-lta-demo.workers.dev/company-lookup" target="_blank" rel="noopener noreferrer">
+                  /company-lookup
+                </a>
+              </p>
             </div>
 
             <div class="input-group checkbox-row">
@@ -107,12 +122,12 @@
               <thead>
                 <tr>
                   <th>Scenario</th>
-                  <th>Time saved<br/>(hrs/rep/week)</th>
-                  <th>Conversion lift<br/>(%)</th>
-                  <th>Tools replaced<br/>(%)</th>
-                  <th>Persana annual cost<br/>(USD)</th>
-                  <th>Rep ratio<br/>(reps per employee)</th>
-                  <th>Rep loaded cost<br/>(USD/year)</th>
+                  <th>Time saved <span class="info-dot" title="Estimated weekly hours saved per sales rep by using Persana workflows and automation." aria-label="Time saved help">i</span><br/>(hrs/rep/week)</th>
+                  <th>Conversion lift <span class="info-dot" title="Expected percentage increase in conversion from existing sales volume due to better targeting and execution." aria-label="Conversion lift help">i</span><br/>(%)</th>
+                  <th>Tools replaced <span class="info-dot" title="Share of current tooling spend that Persana can replace or consolidate." aria-label="Tools replaced help">i</span><br/>(%)</th>
+                  <th>Persana annual cost <span class="info-dot" title="Annual platform cost used for ROI and payback calculations in this scenario." aria-label="Persana annual cost help">i</span><br/>(USD)</th>
+                  <th>Rep ratio <span class="info-dot" title="Estimated number of sales reps per company employee used to derive rep count from company size." aria-label="Rep ratio help">i</span><br/>(reps per employee)</th>
+                  <th>Rep loaded cost <span class="info-dot" title="Fully loaded annual cost per sales rep, including salary and overhead." aria-label="Rep loaded cost help">i</span><br/>(USD/year)</th>
                 </tr>
               </thead>
               <tbody>
@@ -216,15 +231,21 @@
       <div class="charts-grid">
         <article class="chart-card">
           <h3>ROI by scenario</h3>
-          <canvas id="roiChart" aria-label="ROI by scenario" role="img"></canvas>
+          <div class="chart-wrap">
+            <canvas id="roiChart" aria-label="ROI by scenario" role="img"></canvas>
+          </div>
         </article>
         <article class="chart-card">
           <h3>Benefit breakdown</h3>
-          <canvas id="breakdownChart" aria-label="Benefit breakdown by scenario" role="img"></canvas>
+          <div class="chart-wrap">
+            <canvas id="breakdownChart" aria-label="Benefit breakdown by scenario" role="img"></canvas>
+          </div>
         </article>
         <article class="chart-card">
           <h3>Payback period</h3>
-          <canvas id="paybackChart" aria-label="Payback months by scenario" role="img"></canvas>
+          <div class="chart-wrap">
+            <canvas id="paybackChart" aria-label="Payback months by scenario" role="img"></canvas>
+          </div>
         </article>
       </div>
     </section>

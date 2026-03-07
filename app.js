@@ -1,4 +1,5 @@
 const SCENARIOS = ["low", "base", "high"];
+const WORKER_LOOKUP_URL = "https://persana-company-lookup.avi-lta-demo.workers.dev/company-lookup";
 const SCENARIO_LABELS = {
   low: "Low",
   base: "Base",
@@ -69,7 +70,9 @@ const DEFAULT_MOCKS = [
 const form = document.getElementById("roi-form");
 const scenarioButtons = document.querySelectorAll(".scenario-btn");
 const autofillButton = document.getElementById("autofillBtn");
+const lookupModeInputs = document.querySelectorAll("input[name='lookupMode']");
 const lookupStatus = document.getElementById("lookupStatus");
+const aiModeNote = document.getElementById("aiModeNote");
 const sourceList = document.getElementById("sourceList");
 const confidenceBadge = document.getElementById("confidenceBadge");
 const autoSyncTierCostsCheckbox = document.getElementById("autoSyncTierCosts");
@@ -87,6 +90,7 @@ const outputNodes = {
 };
 
 let activeScenario = "low";
+let lookupMode = "manual";
 let chartInstances = {
   roi: null,
   breakdown: null,
@@ -471,14 +475,7 @@ function deterministicFallback(companyName) {
 }
 
 async function runLookup(companyName) {
-  const workerUrl = (document.getElementById("workerUrl").value || "").trim();
-
-  if (!workerUrl) {
-    const demoMatch = findDemoMock(companyName);
-    return demoMatch || deterministicFallback(companyName);
-  }
-
-  const lookupUrl = new URL(workerUrl);
+  const lookupUrl = new URL(WORKER_LOOKUP_URL);
   lookupUrl.searchParams.set("name", companyName.trim());
 
   const response = await fetch(lookupUrl.toString(), {
@@ -537,6 +534,23 @@ function applyLookupResult(data) {
   });
 }
 
+function updateLookupModeUI() {
+  const aiMode = lookupMode === "ai";
+  autofillButton.disabled = !aiMode;
+  aiModeNote.classList.toggle("hidden", !aiMode);
+
+  if (aiMode) {
+    lookupStatus.textContent = "AI Powered mode is on. Run lookup to pull company size and revenue estimate.";
+    confidenceBadge.textContent = "Confidence: not run";
+    sourceList.innerHTML = "<li>Run AI-powered lookup to attach source references.</li>";
+    return;
+  }
+
+  lookupStatus.textContent = "Manual mode is on. Enter values directly.";
+  confidenceBadge.textContent = "Confidence: manual mode";
+  sourceList.innerHTML = "<li>Manual mode selected. Data sourcing is disabled.</li>";
+}
+
 function employeeRangeLabel(value) {
   if (value <= 200) {
     return "1-200";
@@ -554,6 +568,11 @@ function employeeRangeLabel(value) {
 }
 
 async function onAutofillClicked() {
+  if (lookupMode !== "ai") {
+    lookupStatus.textContent = "Switch to AI Powered mode to run lookup.";
+    return;
+  }
+
   const companyName = (document.getElementById("companyName").value || "").trim();
   if (!companyName) {
     lookupStatus.textContent = "Enter a company name before auto-fill.";
@@ -592,6 +611,11 @@ function onScenarioButtonClick(event) {
   recalculate();
 }
 
+function onLookupModeChanged(event) {
+  lookupMode = event.target.value;
+  updateLookupModeUI();
+}
+
 function onInputChanged(event) {
   const { id } = event.target;
 
@@ -616,6 +640,9 @@ function registerEventHandlers() {
   });
 
   autofillButton.addEventListener("click", onAutofillClicked);
+  lookupModeInputs.forEach((input) => {
+    input.addEventListener("change", onLookupModeChanged);
+  });
   autoSyncTierCostsCheckbox.addEventListener("change", () => {
     syncScenarioCostsFromTier();
     recalculate();
@@ -623,9 +650,11 @@ function registerEventHandlers() {
 }
 
 function init() {
+  lookupMode = document.querySelector("input[name='lookupMode']:checked")?.value || "manual";
   renderScenarioSelector();
   syncScenarioCostsFromTier();
   registerEventHandlers();
+  updateLookupModeUI();
   recalculate();
 }
 
