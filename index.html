@@ -71,6 +71,9 @@
                     Launch ROI Calculator
                     <span class="lp-cta-arrow" aria-hidden="true">→</span>
                 </a>
+                <a href="/lta-roi-demo/calculator.html?demo=1" class="lp-demo-btn" id="runDemoBtn">
+                    ▶ Run Interactive Demo
+                </a>
                 <p class="lp-cta-caption">No signup required. Instant results.</p>
             </div>
 
@@ -86,15 +89,13 @@
     </div>
 
     <script>
-        /* On CTA click: play a floating-dot exit animation, then navigate */
-        const cta = document.getElementById("launchCalcBtn");
-        const overlay = document.getElementById("exitOverlay");
-        const canvas = document.getElementById("exitCanvas");
+        /* Shared exit animation for both CTA buttons */
+        (function () {
+            const overlay = document.getElementById("exitOverlay");
+            const canvas = document.getElementById("exitCanvas");
+            if (!overlay || !canvas) return;
 
-        if (cta && overlay && canvas) {
-            cta.addEventListener("click", function (e) {
-                e.preventDefault();
-                const dest = cta.href;
+            function playExitAnimation(dest) {
                 overlay.classList.add("is-active");
 
                 const ctx = canvas.getContext("2d");
@@ -112,31 +113,39 @@
                     particles.push({
                         x: Math.random() * W,
                         y: Math.random() * H,
-                        vx: (Math.random() - 0.5) * 1.5,
-                        vy: (Math.random() - 0.5) * 1.5,
+                        vx: (Math.random() - 0.5) * 1.2,
+                        vy: (Math.random() - 0.5) * 1.2,
                         r: Math.random() * 2.5 + 1,
                         alpha: Math.random() * 0.5 + 0.3
                     });
                 }
 
                 const start = performance.now();
-                const DURATION = 1200;
+                const DURATION = 1400;
 
                 function draw(now) {
                     const elapsed = now - start;
                     const progress = Math.min(elapsed / DURATION, 1);
-                    const globalAlpha = progress;
+                    /* Ease-in curve for smoother build-up */
+                    const globalAlpha = progress * progress;
 
                     ctx.clearRect(0, 0, W, H);
 
-                    /* Background fade in */
-                    ctx.fillStyle = `rgba(24, 24, 24, ${globalAlpha})`;
+                    /* Radial gradient background — matches the entry animation */
+                    const grad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.6);
+                    grad.addColorStop(0, `rgba(220, 159, 133, ${0.06 * globalAlpha})`);
+                    grad.addColorStop(1, `rgba(24, 24, 24, ${globalAlpha})`);
+                    ctx.fillStyle = grad;
                     ctx.fillRect(0, 0, W, H);
 
                     /* Draw particles */
                     for (const p of particles) {
                         p.x += p.vx;
                         p.y += p.vy;
+                        if (p.x < -5) p.x = W + 5;
+                        if (p.x > W + 5) p.x = -5;
+                        if (p.y < -5) p.y = H + 5;
+                        if (p.y > H + 5) p.y = -5;
                         ctx.beginPath();
                         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
                         ctx.fillStyle = `rgba(220, 159, 133, ${p.alpha * globalAlpha})`;
@@ -167,8 +176,25 @@
                     requestAnimationFrame(draw);
                 }
                 requestAnimationFrame(draw);
-            });
-        }
+            }
+
+            /* Hook both buttons */
+            var calcBtn = document.getElementById("launchCalcBtn");
+            var demoBtn = document.getElementById("runDemoBtn");
+
+            if (calcBtn) {
+                calcBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    playExitAnimation(calcBtn.href);
+                });
+            }
+            if (demoBtn) {
+                demoBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    playExitAnimation(demoBtn.href);
+                });
+            }
+        })();
     </script>
 
 </body>

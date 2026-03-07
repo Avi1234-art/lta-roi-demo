@@ -930,6 +930,281 @@ label {
   }
 }
 
+/* ——— Demo: Company Picker ——— */
+.demo-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(24, 24, 24, 0.92);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease-out;
+}
+
+.demo-picker.is-active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.demo-picker-inner {
+  text-align: center;
+  max-width: 640px;
+  padding: 2rem;
+}
+
+.demo-picker-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
+}
+
+.demo-picker-sub {
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+.demo-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.demo-picker-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.4rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: border-color 200ms, transform 200ms, box-shadow 200ms;
+}
+
+.demo-picker-card:hover {
+  border-color: #4A9EFF;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(74, 158, 255, 0.15);
+}
+
+.demo-picker-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.demo-picker-name {
+  font-family: "Source Sans 3", system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.demo-picker-cancel {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 0.55rem 1.2rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color 200ms, border-color 200ms;
+}
+
+.demo-picker-cancel:hover {
+  color: var(--foreground);
+  border-color: var(--dim);
+}
+
+/* ——— Demo: Overlay ——— */
+.demo-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10500;
+  width: 100%;
+  min-height: 100%;
+  background: rgba(24, 24, 24, 0.72);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+}
+
+.demo-overlay.is-active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ——— Demo: Pulsing Dot ——— */
+.demo-dot {
+  position: absolute;
+  z-index: 10600;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4A9EFF;
+  box-shadow: 0 0 0 0 rgba(74, 158, 255, 0.5);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 300ms, left 400ms ease-out, top 400ms ease-out;
+}
+
+.demo-dot.is-active {
+  opacity: 1;
+  animation: demoPulse 2s ease-in-out infinite;
+}
+
+@keyframes demoPulse {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(74, 158, 255, 0.5),
+      0 0 0 0 rgba(74, 158, 255, 0.25);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 12px rgba(74, 158, 255, 0),
+      0 0 0 24px rgba(74, 158, 255, 0);
+  }
+
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(74, 158, 255, 0.5),
+      0 0 0 0 rgba(74, 158, 255, 0.25);
+  }
+}
+
+/* ——— Demo: Tooltip ——— */
+.demo-tooltip {
+  position: absolute;
+  z-index: 10700;
+  background: #1a1a1a;
+  border: 1px solid #2a3a5a;
+  border-radius: var(--radius-lg);
+  padding: 1.2rem 1.4rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(74, 158, 255, 0.08);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+.demo-tooltip.is-active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+.demo-tooltip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+}
+
+.demo-tooltip-step {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #4A9EFF;
+}
+
+.demo-tooltip-skip {
+  background: transparent;
+  border: none;
+  color: var(--dim);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  transition: color 200ms;
+}
+
+.demo-tooltip-skip:hover {
+  color: var(--foreground);
+}
+
+.demo-tooltip-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 0.4rem;
+}
+
+.demo-tooltip-text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+  margin-bottom: 1rem;
+}
+
+.demo-tooltip-nav {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+.demo-tooltip-btn {
+  font-family: "Source Sans 3", system-ui, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: all 180ms;
+}
+
+.demo-tooltip-btn:hover {
+  border-color: var(--dim);
+  color: var(--foreground);
+}
+
+.demo-tooltip-btn--primary {
+  background: #4A9EFF;
+  border-color: #4A9EFF;
+  color: #fff;
+}
+
+.demo-tooltip-btn--primary:hover {
+  background: #5aadff;
+  border-color: #5aadff;
+  color: #fff;
+}
+
+/* ——— Demo: responsive ——— */
+@media (max-width: 600px) {
+  .demo-picker-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .demo-tooltip {
+    left: 8px !important;
+    right: 8px;
+    width: auto !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   *,

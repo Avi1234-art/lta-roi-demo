@@ -906,3 +906,7 @@ function init() {
 }
 
 window.addEventListener("DOMContentLoaded", init);
+
+/* Expose for demo.js */
+window.applyLookupResult = applyLookupResult;
+window.recalculate = recalculate;

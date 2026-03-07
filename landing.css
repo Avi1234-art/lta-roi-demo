@@ -98,6 +98,7 @@ body {
     z-index: 10000;
     pointer-events: none;
     opacity: 0;
+    background: var(--lp-bg);
     transition: opacity 100ms;
 }
 
@@ -310,6 +311,38 @@ body {
     transform: translateX(3px);
 }
 
+.lp-demo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.7rem;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    color: var(--lp-muted);
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 500;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    border: 1px solid var(--lp-dark-line);
+    border-radius: var(--lp-radius);
+    cursor: pointer;
+    transition: color 200ms ease-out, border-color 200ms ease-out, transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.lp-demo-btn:hover {
+    color: var(--lp-text);
+    border-color: var(--lp-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 159, 133, 0.12);
+}
+
+.lp-demo-btn:active {
+    transform: translateY(0);
+}
+
 .lp-cta-caption {
     margin-top: 0.9rem;
     font-size: 0.78rem;
@@ -392,7 +425,8 @@ body {
         font-size: 0.95rem;
     }
 
-    .lp-cta-btn {
+    .lp-cta-btn,
+    .lp-demo-btn {
         width: 100%;
         justify-content: center;
     }

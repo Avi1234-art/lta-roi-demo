@@ -40,8 +40,8 @@
     }
 
     let startTime = performance.now();
-    const DURATION = 1600; /* ms total animation length */
-    const FADE_START = 700; /* ms when fade-out begins */
+    const DURATION = 1800; /* ms total animation length */
+    const FADE_START = 900; /* ms when fade-out begins (hold dark longer for seamless handoff) */
     let animId;
 
     function draw(now) {
