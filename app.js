@@ -508,9 +508,26 @@ function buildChartTheme() {
     accent: "#dc9f85",
     accentSecondary: "#e5ad94",
     border: "#35211a",
-    gridLine: "rgba(53, 33, 26, 0.4)",
+    gridLine: "rgba(53, 33, 26, 0.25)",
     foreground: "#e8ddd0"
   };
+}
+
+function createBarGradients(ctx, colors, chartHeight) {
+  return colors.map((color) => {
+    const gradient = ctx.createLinearGradient(0, chartHeight, 0, 0);
+    /* Parse rgba color and create faded version for top */
+    const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+      const [, r, g, b] = match;
+      gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.85)`);
+      gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.3)`);
+    } else {
+      gradient.addColorStop(0, color);
+      gradient.addColorStop(1, color);
+    }
+    return gradient;
+  });
 }
 
 function createOrUpdateCharts(resultsByScenario) {
@@ -552,21 +569,23 @@ function createOrUpdateCharts(resultsByScenario) {
     },
     y: {
       ticks: { color: theme.axis, font: { ...chartFont, size: 11 } },
-      grid: { color: theme.gridLine, lineWidth: 0.8 },
+      grid: { color: theme.gridLine, lineWidth: 0.6 },
       border: { display: false }
     }
   };
 
   if (!chartInstances.roi) {
-    chartInstances.roi = new Chart(document.getElementById("roiChart"), {
+    const roiCtx = document.getElementById("roiChart").getContext("2d");
+    const roiGradients = createBarGradients(roiCtx, SCENARIO_COLORS.bg, 220);
+    chartInstances.roi = new Chart(roiCtx, {
       type: "bar",
       data: {
         labels,
         datasets: [{
           label: "ROI %",
           data: roiData,
-          backgroundColor: SCENARIO_COLORS.bg,
-          borderRadius: 8,
+          backgroundColor: roiGradients,
+          borderRadius: 10,
           borderSkipped: false,
           maxBarThickness: 56
         }]
@@ -584,7 +603,11 @@ function createOrUpdateCharts(resultsByScenario) {
   }
 
   if (!chartInstances.breakdown) {
-    chartInstances.breakdown = new Chart(document.getElementById("breakdownChart"), {
+    const breakdownCtx = document.getElementById("breakdownChart").getContext("2d");
+    const timeGradients = createBarGradients(breakdownCtx, BREAKDOWN_COLORS.time, 220);
+    const toolsGradients = createBarGradients(breakdownCtx, BREAKDOWN_COLORS.tools, 220);
+    const revenueGradients = createBarGradients(breakdownCtx, BREAKDOWN_COLORS.revenue, 220);
+    chartInstances.breakdown = new Chart(breakdownCtx, {
       type: "bar",
       data: {
         labels,
@@ -592,22 +615,22 @@ function createOrUpdateCharts(resultsByScenario) {
           {
             label: "Time savings",
             data: breakdownData.time,
-            backgroundColor: BREAKDOWN_COLORS.time,
+            backgroundColor: timeGradients,
             borderRadius: 0,
             maxBarThickness: 56
           },
           {
             label: "Tool savings",
             data: breakdownData.tools,
-            backgroundColor: BREAKDOWN_COLORS.tools,
+            backgroundColor: toolsGradients,
             borderRadius: 0,
             maxBarThickness: 56
           },
           {
             label: "Revenue lift",
             data: breakdownData.revenue,
-            backgroundColor: BREAKDOWN_COLORS.revenue,
-            borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
+            backgroundColor: revenueGradients,
+            borderRadius: { topLeft: 10, topRight: 10, bottomLeft: 0, bottomRight: 0 },
             maxBarThickness: 56
           }
         ]
@@ -643,15 +666,17 @@ function createOrUpdateCharts(resultsByScenario) {
   }
 
   if (!chartInstances.payback) {
-    chartInstances.payback = new Chart(document.getElementById("paybackChart"), {
+    const paybackCtx = document.getElementById("paybackChart").getContext("2d");
+    const paybackGradients = createBarGradients(paybackCtx, SCENARIO_COLORS.bg, 220);
+    chartInstances.payback = new Chart(paybackCtx, {
       type: "bar",
       data: {
         labels,
         datasets: [{
           label: "Payback (months)",
           data: paybackData,
-          backgroundColor: SCENARIO_COLORS.bg,
-          borderRadius: 8,
+          backgroundColor: paybackGradients,
+          borderRadius: 10,
           borderSkipped: false,
           maxBarThickness: 56
         }]
