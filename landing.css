@@ -112,6 +112,105 @@ body {
     height: 100%;
 }
 
+/* ——— Demo company picker overlay ——— */
+.lp-demo-picker {
+    position: fixed;
+    inset: 0;
+    z-index: 10500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(24, 24, 24, 0.55);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 400ms ease-out;
+}
+
+.lp-demo-picker.is-active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.lp-demo-picker-inner {
+    text-align: center;
+    max-width: 600px;
+    padding: 2rem;
+}
+
+.lp-demo-picker-title {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--lp-text);
+    margin-bottom: 0.4rem;
+}
+
+.lp-demo-picker-sub {
+    color: var(--lp-muted);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+}
+
+.lp-demo-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.lp-demo-picker-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.2rem 0.8rem;
+    background: rgba(30, 30, 30, 0.85);
+    border: 1px solid var(--lp-dark-line);
+    border-radius: var(--lp-radius);
+    cursor: pointer;
+    transition: border-color 200ms, transform 200ms, box-shadow 200ms;
+}
+
+.lp-demo-picker-card:hover {
+    border-color: #4A9EFF;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(74, 158, 255, 0.18);
+}
+
+.lp-demo-picker-logo {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.lp-demo-picker-name {
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--lp-text);
+}
+
+.lp-demo-picker-cancel {
+    background: transparent;
+    border: 1px solid var(--lp-dark-line);
+    color: var(--lp-muted);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 0.5rem 1.2rem;
+    border-radius: var(--lp-radius);
+    cursor: pointer;
+    transition: color 200ms, border-color 200ms;
+}
+
+.lp-demo-picker-cancel:hover {
+    color: var(--lp-text);
+    border-color: var(--lp-muted);
+}
+
 /* ——— Hero ——— */
 .lp-hero {
     position: relative;
@@ -410,6 +509,10 @@ body {
 
     .lp-value-text {
         max-width: none;
+    }
+
+    .lp-demo-picker-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 

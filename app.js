@@ -865,6 +865,62 @@ function initInfoTooltips() {
   });
 }
 
+/* ——— Autocomplete dropdown ——— */
+let autocompleteDropdown = null;
+
+function onAutocompleteInput() {
+  if (lookupMode !== "ai") { hideAutocomplete(); return; }
+  const query = companyNameInput.value.trim().toLowerCase();
+  if (!query) { hideAutocomplete(); return; }
+
+  const matches = DEFAULT_MOCKS.filter((mock) =>
+    mock.companyName.toLowerCase().startsWith(query) ||
+    mock.aliases.some((a) => a.startsWith(query))
+  );
+
+  if (matches.length === 0) { hideAutocomplete(); return; }
+  showAutocomplete(matches);
+}
+
+function showAutocomplete(matches) {
+  hideAutocomplete();
+  autocompleteDropdown = document.createElement("div");
+  autocompleteDropdown.className = "autocomplete-dropdown";
+
+  matches.forEach((mock) => {
+    const item = document.createElement("div");
+    item.className = "autocomplete-item";
+    const domain = mock.logoUrl.replace("https://logo.clearbit.com/", "");
+    item.innerHTML = `
+      <img class="autocomplete-logo" src="${mock.logoUrl}" alt=""
+           onerror="this.src='https://www.google.com/s2/favicons?domain=${domain}&sz=64'" />
+      <div class="autocomplete-info">
+        <span class="autocomplete-name">${mock.companyName}</span>
+        <span class="autocomplete-meta">${mock.employeeEstimate.toLocaleString()} employees</span>
+      </div>
+    `;
+    item.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      companyNameInput.value = mock.companyName;
+      hideAutocomplete();
+      onAutofillClicked();
+    });
+    autocompleteDropdown.appendChild(item);
+  });
+
+  /* Position relative to input */
+  const parent = companyNameInput.closest(".input-group") || companyNameInput.parentElement;
+  parent.style.position = "relative";
+  parent.appendChild(autocompleteDropdown);
+}
+
+function hideAutocomplete() {
+  if (autocompleteDropdown) {
+    autocompleteDropdown.remove();
+    autocompleteDropdown = null;
+  }
+}
+
 function registerEventHandlers() {
   form.addEventListener("input", onInputChanged);
   form.addEventListener("change", onInputChanged);
@@ -879,9 +935,20 @@ function registerEventHandlers() {
   companyNameInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
+      hideAutocomplete();
       if (lookupMode === "ai" && companyNameInput.value.trim()) {
         onAutofillClicked();
       }
+    }
+    if (e.key === "Escape") hideAutocomplete();
+  });
+
+  /* Autocomplete dropdown on input */
+  companyNameInput.addEventListener("input", onAutocompleteInput);
+  companyNameInput.addEventListener("focus", onAutocompleteInput);
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".autocomplete-dropdown") && e.target !== companyNameInput) {
+      hideAutocomplete();
     }
   });
 

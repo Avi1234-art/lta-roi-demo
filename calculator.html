@@ -138,15 +138,15 @@
           <div class="input-grid tiers-grid">
             <div class="input-group">
               <label for="tierSmbCostUsd">SMB (1-200)</label>
-              <input id="tierSmbCostUsd" type="number" min="0" step="1000" value="36000" />
+              <input id="tierSmbCostUsd" type="number" min="0" step="100" value="1800" />
             </div>
             <div class="input-group">
               <label for="tierMidCostUsd">Mid-market (201-1000)</label>
-              <input id="tierMidCostUsd" type="number" min="0" step="1000" value="120000" />
+              <input id="tierMidCostUsd" type="number" min="0" step="100" value="4800" />
             </div>
             <div class="input-group">
               <label for="tierEntCostUsd">Enterprise (1001+)</label>
-              <input id="tierEntCostUsd" type="number" min="0" step="1000" value="400000" />
+              <input id="tierEntCostUsd" type="number" min="0" step="100" value="7200" />
             </div>
           </div>
 
@@ -179,28 +179,28 @@
               <tbody>
                 <tr>
                   <td>Low</td>
-                  <td><input id="low-timeSavedHoursPerRepPerWeek" type="number" min="0" step="0.1" value="2" /></td>
-                  <td><input id="low-conversionLiftPct" type="number" min="0" step="0.1" value="3" /></td>
-                  <td><input id="low-toolsReplacedPct" type="number" min="0" max="100" step="1" value="30" /></td>
-                  <td><input id="low-persanaAnnualCostUsd" type="number" min="0" step="1000" value="36000" /></td>
+                  <td><input id="low-timeSavedHoursPerRepPerWeek" type="number" min="0" step="0.1" value="1" /></td>
+                  <td><input id="low-conversionLiftPct" type="number" min="0" step="0.1" value="1.5" /></td>
+                  <td><input id="low-toolsReplacedPct" type="number" min="0" max="100" step="1" value="15" /></td>
+                  <td><input id="low-persanaAnnualCostUsd" type="number" min="0" step="100" value="1800" /></td>
                   <td><input id="low-repCountRatio" type="number" min="0" step="0.001" value="0.001" /></td>
                   <td><input id="low-repFullyLoadedAnnualUsd" type="number" min="0" step="1000" value="130000" /></td>
                 </tr>
                 <tr>
                   <td>Base</td>
-                  <td><input id="base-timeSavedHoursPerRepPerWeek" type="number" min="0" step="0.1" value="4" /></td>
-                  <td><input id="base-conversionLiftPct" type="number" min="0" step="0.1" value="7" /></td>
-                  <td><input id="base-toolsReplacedPct" type="number" min="0" max="100" step="1" value="50" /></td>
-                  <td><input id="base-persanaAnnualCostUsd" type="number" min="0" step="1000" value="120000" /></td>
+                  <td><input id="base-timeSavedHoursPerRepPerWeek" type="number" min="0" step="0.1" value="2.5" /></td>
+                  <td><input id="base-conversionLiftPct" type="number" min="0" step="0.1" value="4" /></td>
+                  <td><input id="base-toolsReplacedPct" type="number" min="0" max="100" step="1" value="30" /></td>
+                  <td><input id="base-persanaAnnualCostUsd" type="number" min="0" step="100" value="4800" /></td>
                   <td><input id="base-repCountRatio" type="number" min="0" step="0.001" value="0.002" /></td>
                   <td><input id="base-repFullyLoadedAnnualUsd" type="number" min="0" step="1000" value="150000" /></td>
                 </tr>
                 <tr>
                   <td>High</td>
-                  <td><input id="high-timeSavedHoursPerRepPerWeek" type="number" min="0" step="0.1" value="6" /></td>
-                  <td><input id="high-conversionLiftPct" type="number" min="0" step="0.1" value="12" /></td>
-                  <td><input id="high-toolsReplacedPct" type="number" min="0" max="100" step="1" value="70" /></td>
-                  <td><input id="high-persanaAnnualCostUsd" type="number" min="0" step="1000" value="400000" /></td>
+                  <td><input id="high-timeSavedHoursPerRepPerWeek" type="number" min="0" step="0.1" value="4" /></td>
+                  <td><input id="high-conversionLiftPct" type="number" min="0" step="0.1" value="8" /></td>
+                  <td><input id="high-toolsReplacedPct" type="number" min="0" max="100" step="1" value="50" /></td>
+                  <td><input id="high-persanaAnnualCostUsd" type="number" min="0" step="100" value="7200" /></td>
                   <td><input id="high-repCountRatio" type="number" min="0" step="0.001" value="0.003" /></td>
                   <td><input id="high-repFullyLoadedAnnualUsd" type="number" min="0" step="1000" value="170000" /></td>
                 </tr>

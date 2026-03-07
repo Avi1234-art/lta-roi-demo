@@ -173,7 +173,7 @@
             card.className = "demo-picker-card";
             card.dataset.company = co.key;
             card.innerHTML = `
-        <img class="demo-picker-logo" src="${co.logoUrl}" alt="${co.name}" 
+        <img class="demo-picker-logo" src="${co.logoUrl}" alt="${co.name}"
              onerror="this.src='https://www.google.com/s2/favicons?domain=${co.domain}&sz=128'" />
         <span class="demo-picker-name">${co.name}</span>
       `;
@@ -282,6 +282,8 @@
         setTimeout(() => {
             const steps = buildSteps(co);
             let currentStep = 0;
+            let isTransitioning = false;
+            let prevHighlight = null;
 
             const { overlay, dot, tooltip } = createSpotlightUI();
             const titleEl = document.getElementById("demoTitle");
@@ -291,14 +293,23 @@
             const nextBtn = document.getElementById("demoNext");
             const skipBtn = document.getElementById("demoSkip");
 
-            function showStep(index) {
-                currentStep = index;
+            function removeHighlight() {
+                if (prevHighlight) {
+                    prevHighlight.classList.remove("demo-highlight");
+                    prevHighlight = null;
+                }
+            }
+
+            function showStep(index, isFirst) {
+                if (isTransitioning) return;
+                isTransitioning = true;
+
                 const step = steps[index];
                 const targetEl = document.querySelector(step.target);
 
                 if (!targetEl) {
-                    /* Skip if element not found */
-                    if (index < steps.length - 1) showStep(index + 1);
+                    isTransitioning = false;
+                    if (index < steps.length - 1) showStep(index + 1, isFirst);
                     return;
                 }
 
@@ -308,26 +319,49 @@
                     spotlightTarget = targetEl.closest(".kpi-card") || targetEl;
                 }
 
-                /* Scroll into view */
-                scrollTo(spotlightTarget);
+                /* Phase 1: Fade out tooltip (skip on first step) */
+                if (!isFirst) {
+                    tooltip.classList.remove("is-active");
+                    dot.classList.remove("is-active");
+                }
+                removeHighlight();
+
+                const fadeOutDuration = isFirst ? 0 : 300;
 
                 setTimeout(() => {
-                    titleEl.textContent = step.title;
-                    textEl.textContent = step.textFn ? step.textFn() : step.text;
-                    stepCounter.textContent = `Step ${index + 1}/${steps.length}`;
+                    currentStep = index;
 
-                    prevBtn.style.display = index === 0 ? "none" : "";
-                    nextBtn.textContent = step.isFinal ? "Finish ✓" : "Next →";
+                    /* Scroll into view */
+                    scrollTo(spotlightTarget);
 
-                    overlay.classList.add("is-active");
-                    dot.classList.add("is-active");
-                    tooltip.classList.add("is-active");
+                    /* Phase 2: After scroll settles, update content and fade in */
+                    setTimeout(() => {
+                        titleEl.textContent = step.title;
+                        textEl.textContent = step.textFn ? step.textFn() : step.text;
+                        stepCounter.textContent = `Step ${index + 1}/${steps.length}`;
+                        prevBtn.style.display = index === 0 ? "none" : "";
+                        nextBtn.textContent = step.isFinal ? "Finish ✓" : "Next →";
 
-                    positionSpotlight(spotlightTarget, dot, tooltip, overlay);
-                }, 350);
+                        /* Add highlight glow to target */
+                        spotlightTarget.classList.add("demo-highlight");
+                        prevHighlight = spotlightTarget;
+
+                        /* Position and reveal */
+                        overlay.classList.add("is-active");
+                        positionSpotlight(spotlightTarget, dot, tooltip, overlay);
+
+                        /* Slight delay before showing tooltip for a staggered feel */
+                        setTimeout(() => {
+                            dot.classList.add("is-active");
+                            tooltip.classList.add("is-active");
+                            isTransitioning = false;
+                        }, 150);
+                    }, 450);
+                }, fadeOutDuration);
             }
 
             function endDemo() {
+                removeHighlight();
                 overlay.classList.remove("is-active");
                 dot.classList.remove("is-active");
                 tooltip.classList.remove("is-active");
@@ -342,6 +376,7 @@
                 /* Clean URL */
                 const url = new URL(window.location);
                 url.searchParams.delete("demo");
+                url.searchParams.delete("company");
                 window.history.replaceState({}, "", url.toString());
             }
 
@@ -349,12 +384,12 @@
                 if (currentStep >= steps.length - 1) {
                     endDemo();
                 } else {
-                    showStep(currentStep + 1);
+                    showStep(currentStep + 1, false);
                 }
             });
 
             prevBtn.addEventListener("click", () => {
-                if (currentStep > 0) showStep(currentStep - 1);
+                if (currentStep > 0) showStep(currentStep - 1, false);
             });
 
             skipBtn.addEventListener("click", endDemo);
@@ -377,7 +412,7 @@
                 }, 100);
             });
 
-            showStep(0);
+            showStep(0, true);
         }, 600);
     }
 
@@ -386,29 +421,37 @@
         const params = new URLSearchParams(window.location.search);
         if (params.get("demo") !== "1") return;
 
+        /* Check if a company was pre-selected from the landing page */
+        const companyKey = params.get("company");
+
         /* Wait for page transition to finish */
         const delay = 2400;
         setTimeout(() => {
-            const picker = createPickerOverlay();
-            picker.classList.add("is-active");
+            if (companyKey && DEMO_COMPANIES.find((c) => c.key === companyKey)) {
+                /* Company was chosen on landing page — start demo directly */
+                startDemo(companyKey);
+            } else {
+                /* No company specified — show picker as fallback */
+                const picker = createPickerOverlay();
+                picker.classList.add("is-active");
 
-            /* Company card clicks */
-            picker.addEventListener("click", (e) => {
-                const card = e.target.closest(".demo-picker-card");
-                if (card) {
-                    picker.classList.remove("is-active");
-                    setTimeout(() => picker.remove(), 300);
-                    startDemo(card.dataset.company);
-                    return;
-                }
-                if (e.target.id === "demoPickerCancel") {
-                    picker.classList.remove("is-active");
-                    setTimeout(() => picker.remove(), 300);
-                    const url = new URL(window.location);
-                    url.searchParams.delete("demo");
-                    window.history.replaceState({}, "", url.toString());
-                }
-            });
+                picker.addEventListener("click", (e) => {
+                    const card = e.target.closest(".demo-picker-card");
+                    if (card) {
+                        picker.classList.remove("is-active");
+                        setTimeout(() => picker.remove(), 300);
+                        startDemo(card.dataset.company);
+                        return;
+                    }
+                    if (e.target.id === "demoPickerCancel") {
+                        picker.classList.remove("is-active");
+                        setTimeout(() => picker.remove(), 300);
+                        const url = new URL(window.location);
+                        url.searchParams.delete("demo");
+                        window.history.replaceState({}, "", url.toString());
+                    }
+                });
+            }
         }, delay);
     }
 

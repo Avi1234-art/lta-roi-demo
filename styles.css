@@ -301,6 +301,60 @@ label {
   margin-bottom: 0.85rem;
 }
 
+/* ——— Autocomplete dropdown ——— */
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  max-height: 240px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-md);
+  margin-top: 4px;
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.8rem;
+  cursor: pointer;
+  transition: background 120ms;
+}
+
+.autocomplete-item:hover {
+  background: var(--muted);
+}
+
+.autocomplete-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.autocomplete-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.autocomplete-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.autocomplete-meta {
+  font-size: 0.72rem;
+  color: var(--dim);
+}
+
 /* ——— Mode toggle ——— */
 .mode-toggle {
   margin: 0 0 0.85rem;
@@ -1084,6 +1138,31 @@ label {
     box-shadow:
       0 0 0 0 rgba(74, 158, 255, 0.5),
       0 0 0 0 rgba(74, 158, 255, 0.25);
+  }
+}
+
+/* ——— Demo: Highlight glow on target element ——— */
+.demo-highlight {
+  position: relative;
+  z-index: 10550;
+  box-shadow:
+    0 0 0 3px rgba(74, 158, 255, 0.35),
+    0 0 24px rgba(74, 158, 255, 0.12);
+  border-radius: var(--radius-lg);
+  transition: box-shadow 400ms ease-out;
+  animation: demoHighlightPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes demoHighlightPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px rgba(74, 158, 255, 0.35),
+      0 0 24px rgba(74, 158, 255, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 0 5px rgba(74, 158, 255, 0.2),
+      0 0 32px rgba(74, 158, 255, 0.18);
   }
 }
 

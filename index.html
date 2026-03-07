@@ -88,110 +88,180 @@
         <canvas id="exitCanvas"></canvas>
     </div>
 
+    <!-- Demo company picker (shown over animation) -->
+    <div class="lp-demo-picker" id="demoPicker">
+        <div class="lp-demo-picker-inner">
+            <h2 class="lp-demo-picker-title">Choose a Company</h2>
+            <p class="lp-demo-picker-sub">Select a company to see a personalized ROI walkthrough</p>
+            <div class="lp-demo-picker-grid">
+                <button class="lp-demo-picker-card" data-company="google">
+                    <img class="lp-demo-picker-logo" src="https://logo.clearbit.com/google.com" alt="Google"
+                        onerror="this.src='https://www.google.com/s2/favicons?domain=google.com&sz=128'" />
+                    <span class="lp-demo-picker-name">Google</span>
+                </button>
+                <button class="lp-demo-picker-card" data-company="tesla">
+                    <img class="lp-demo-picker-logo" src="https://logo.clearbit.com/tesla.com" alt="Tesla"
+                        onerror="this.src='https://www.google.com/s2/favicons?domain=tesla.com&sz=128'" />
+                    <span class="lp-demo-picker-name">Tesla</span>
+                </button>
+                <button class="lp-demo-picker-card" data-company="microsoft">
+                    <img class="lp-demo-picker-logo" src="https://logo.clearbit.com/microsoft.com" alt="Microsoft"
+                        onerror="this.src='https://www.google.com/s2/favicons?domain=microsoft.com&sz=128'" />
+                    <span class="lp-demo-picker-name">Microsoft</span>
+                </button>
+                <button class="lp-demo-picker-card" data-company="salesforce">
+                    <img class="lp-demo-picker-logo" src="https://logo.clearbit.com/salesforce.com" alt="Salesforce"
+                        onerror="this.src='https://www.google.com/s2/favicons?domain=salesforce.com&sz=128'" />
+                    <span class="lp-demo-picker-name">Salesforce</span>
+                </button>
+                <button class="lp-demo-picker-card" data-company="hubspot">
+                    <img class="lp-demo-picker-logo" src="https://logo.clearbit.com/hubspot.com" alt="HubSpot"
+                        onerror="this.src='https://www.google.com/s2/favicons?domain=hubspot.com&sz=128'" />
+                    <span class="lp-demo-picker-name">HubSpot</span>
+                </button>
+                <button class="lp-demo-picker-card" data-company="adobe">
+                    <img class="lp-demo-picker-logo" src="https://logo.clearbit.com/adobe.com" alt="Adobe"
+                        onerror="this.src='https://www.google.com/s2/favicons?domain=adobe.com&sz=128'" />
+                    <span class="lp-demo-picker-name">Adobe</span>
+                </button>
+            </div>
+            <button class="lp-demo-picker-cancel" id="demoPickerCancel">Cancel</button>
+        </div>
+    </div>
+
     <script>
-        /* Shared exit animation for both CTA buttons */
         (function () {
-            const overlay = document.getElementById("exitOverlay");
-            const canvas = document.getElementById("exitCanvas");
+            var overlay = document.getElementById("exitOverlay");
+            var canvas = document.getElementById("exitCanvas");
+            var picker = document.getElementById("demoPicker");
             if (!overlay || !canvas) return;
 
-            function playExitAnimation(dest) {
+            var animRunning = false;
+            var animId;
+
+            /* Start the particle animation loop (runs continuously in background) */
+            function startParticleAnimation() {
+                if (animRunning) return;
+                animRunning = true;
                 overlay.classList.add("is-active");
 
-                const ctx = canvas.getContext("2d");
-                const DPR = window.devicePixelRatio || 1;
-                const W = window.innerWidth;
-                const H = window.innerHeight;
+                var ctx = canvas.getContext("2d");
+                var DPR = window.devicePixelRatio || 1;
+                var W = window.innerWidth;
+                var H = window.innerHeight;
                 canvas.width = W * DPR;
                 canvas.height = H * DPR;
                 canvas.style.width = W + "px";
                 canvas.style.height = H + "px";
                 ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-                const particles = [];
-                for (let i = 0; i < 50; i++) {
+                var particles = [];
+                for (var i = 0; i < 60; i++) {
                     particles.push({
-                        x: Math.random() * W,
-                        y: Math.random() * H,
-                        vx: (Math.random() - 0.5) * 1.2,
-                        vy: (Math.random() - 0.5) * 1.2,
-                        r: Math.random() * 2.5 + 1,
-                        alpha: Math.random() * 0.5 + 0.3
+                        x: Math.random() * W, y: Math.random() * H,
+                        vx: (Math.random() - 0.5) * 1.2, vy: (Math.random() - 0.5) * 1.2,
+                        r: Math.random() * 2.5 + 1, alpha: Math.random() * 0.5 + 0.3
                     });
                 }
 
-                const start = performance.now();
-                const DURATION = 1400;
+                var startTime = performance.now();
+                var FADE_IN = 800;
 
                 function draw(now) {
-                    const elapsed = now - start;
-                    const progress = Math.min(elapsed / DURATION, 1);
-                    /* Ease-in curve for smoother build-up */
-                    const globalAlpha = progress * progress;
+                    var elapsed = now - startTime;
+                    /* Fade in over 800ms, then hold at full */
+                    var globalAlpha = Math.min(elapsed / FADE_IN, 1);
 
                     ctx.clearRect(0, 0, W, H);
 
-                    /* Radial gradient background — matches the entry animation */
-                    const grad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.6);
-                    grad.addColorStop(0, `rgba(220, 159, 133, ${0.06 * globalAlpha})`);
-                    grad.addColorStop(1, `rgba(24, 24, 24, ${globalAlpha})`);
+                    var grad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.6);
+                    grad.addColorStop(0, "rgba(220, 159, 133, " + (0.06 * globalAlpha) + ")");
+                    grad.addColorStop(1, "rgba(24, 24, 24, " + globalAlpha + ")");
                     ctx.fillStyle = grad;
                     ctx.fillRect(0, 0, W, H);
 
-                    /* Draw particles */
-                    for (const p of particles) {
-                        p.x += p.vx;
-                        p.y += p.vy;
+                    for (var k = 0; k < particles.length; k++) {
+                        var p = particles[k];
+                        p.x += p.vx; p.y += p.vy;
                         if (p.x < -5) p.x = W + 5;
                         if (p.x > W + 5) p.x = -5;
                         if (p.y < -5) p.y = H + 5;
                         if (p.y > H + 5) p.y = -5;
                         ctx.beginPath();
                         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(220, 159, 133, ${p.alpha * globalAlpha})`;
+                        ctx.fillStyle = "rgba(220, 159, 133, " + (p.alpha * globalAlpha) + ")";
                         ctx.fill();
                     }
 
-                    /* Draw connections */
-                    for (let i = 0; i < particles.length; i++) {
-                        for (let j = i + 1; j < particles.length; j++) {
-                            const dx = particles[i].x - particles[j].x;
-                            const dy = particles[i].y - particles[j].y;
-                            const dist = Math.sqrt(dx * dx + dy * dy);
+                    for (var a = 0; a < particles.length; a++) {
+                        for (var b = a + 1; b < particles.length; b++) {
+                            var dx = particles[a].x - particles[b].x;
+                            var dy = particles[a].y - particles[b].y;
+                            var dist = Math.sqrt(dx * dx + dy * dy);
                             if (dist < 120) {
                                 ctx.beginPath();
-                                ctx.moveTo(particles[i].x, particles[i].y);
-                                ctx.lineTo(particles[j].x, particles[j].y);
-                                ctx.strokeStyle = `rgba(220, 159, 133, ${(1 - dist / 120) * 0.15 * globalAlpha})`;
+                                ctx.moveTo(particles[a].x, particles[a].y);
+                                ctx.lineTo(particles[b].x, particles[b].y);
+                                ctx.strokeStyle = "rgba(220, 159, 133, " + ((1 - dist / 120) * 0.15 * globalAlpha) + ")";
                                 ctx.lineWidth = 0.5;
                                 ctx.stroke();
                             }
                         }
                     }
 
-                    if (elapsed >= DURATION) {
-                        window.location.href = dest;
-                        return;
-                    }
-                    requestAnimationFrame(draw);
+                    if (animRunning) animId = requestAnimationFrame(draw);
                 }
-                requestAnimationFrame(draw);
+                animId = requestAnimationFrame(draw);
             }
 
-            /* Hook both buttons */
-            var calcBtn = document.getElementById("launchCalcBtn");
-            var demoBtn = document.getElementById("runDemoBtn");
+            /* Stop animation and navigate */
+            function navigateTo(dest) {
+                animRunning = false;
+                cancelAnimationFrame(animId);
+                window.location.href = dest;
+            }
 
+            /* --- Calculator button: play exit animation then navigate --- */
+            var calcBtn = document.getElementById("launchCalcBtn");
             if (calcBtn) {
                 calcBtn.addEventListener("click", function (e) {
                     e.preventDefault();
-                    playExitAnimation(calcBtn.href);
+                    startParticleAnimation();
+                    setTimeout(function () { navigateTo(calcBtn.href); }, 1400);
                 });
             }
-            if (demoBtn) {
+
+            /* --- Demo button: show particles + picker, navigate on selection --- */
+            var demoBtn = document.getElementById("runDemoBtn");
+            if (demoBtn && picker) {
                 demoBtn.addEventListener("click", function (e) {
                     e.preventDefault();
-                    playExitAnimation(demoBtn.href);
+                    startParticleAnimation();
+                    /* Fade in picker after particles start covering the screen */
+                    setTimeout(function () {
+                        picker.classList.add("is-active");
+                    }, 600);
+                });
+
+                /* Company card clicks */
+                picker.addEventListener("click", function (e) {
+                    var card = e.target.closest(".lp-demo-picker-card");
+                    if (card) {
+                        var company = card.dataset.company;
+                        picker.classList.remove("is-active");
+                        var dest = "/lta-roi-demo/calculator.html?demo=1&company=" + company;
+                        setTimeout(function () { navigateTo(dest); }, 400);
+                        return;
+                    }
+                    if (e.target.id === "demoPickerCancel") {
+                        picker.classList.remove("is-active");
+                        /* Stop animation and restore page */
+                        setTimeout(function () {
+                            animRunning = false;
+                            cancelAnimationFrame(animId);
+                            overlay.classList.remove("is-active");
+                        }, 300);
+                    }
                 });
             }
         })();
