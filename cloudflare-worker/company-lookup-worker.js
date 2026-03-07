@@ -4,7 +4,7 @@ const DEMO_MOCKS = [
     companyName: "Microsoft",
     employeeEstimate: 221000,
     revenueEstimateUsd: 245000000000,
-    logoUrl: "https://img.logo.dev/microsoft.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
+    logoUrl: "https://api.companyenrich.com/logos/v1/microsoft.com",
     confidence: 0.88,
     sources: [
       { label: "Wikipedia: Microsoft", url: "https://en.wikipedia.org/wiki/Microsoft", field: "company" },
@@ -16,7 +16,7 @@ const DEMO_MOCKS = [
     companyName: "Salesforce",
     employeeEstimate: 72682,
     revenueEstimateUsd: 34860000000,
-    logoUrl: "https://img.logo.dev/salesforce.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
+    logoUrl: "https://api.companyenrich.com/logos/v1/salesforce.com",
     confidence: 0.84,
     sources: [
       { label: "Wikipedia: Salesforce", url: "https://en.wikipedia.org/wiki/Salesforce", field: "company" },
@@ -28,7 +28,7 @@ const DEMO_MOCKS = [
     companyName: "HubSpot",
     employeeEstimate: 8400,
     revenueEstimateUsd: 2200000000,
-    logoUrl: "https://img.logo.dev/hubspot.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
+    logoUrl: "https://api.companyenrich.com/logos/v1/hubspot.com",
     confidence: 0.79,
     sources: [
       { label: "Wikipedia: HubSpot", url: "https://en.wikipedia.org/wiki/HubSpot", field: "company" }
@@ -39,7 +39,7 @@ const DEMO_MOCKS = [
     companyName: "Adobe",
     employeeEstimate: 29800,
     revenueEstimateUsd: 21500000000,
-    logoUrl: "https://img.logo.dev/adobe.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
+    logoUrl: "https://api.companyenrich.com/logos/v1/adobe.com",
     confidence: 0.82,
     sources: [
       { label: "Wikipedia: Adobe", url: "https://en.wikipedia.org/wiki/Adobe_Inc.", field: "company" }
@@ -50,7 +50,7 @@ const DEMO_MOCKS = [
     companyName: "Oracle",
     employeeEstimate: 159000,
     revenueEstimateUsd: 53000000000,
-    logoUrl: "https://img.logo.dev/oracle.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
+    logoUrl: "https://api.companyenrich.com/logos/v1/oracle.com",
     confidence: 0.84,
     sources: [
       { label: "Wikipedia: Oracle", url: "https://en.wikipedia.org/wiki/Oracle_Corporation", field: "company" }
@@ -61,7 +61,7 @@ const DEMO_MOCKS = [
     companyName: "Google",
     employeeEstimate: 182502,
     revenueEstimateUsd: 307400000000,
-    logoUrl: "https://img.logo.dev/google.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
+    logoUrl: "https://api.companyenrich.com/logos/v1/google.com",
     confidence: 0.9,
     sources: [
       { label: "Wikipedia: Google", url: "https://en.wikipedia.org/wiki/Google", field: "company" },
@@ -73,7 +73,7 @@ const DEMO_MOCKS = [
     companyName: "Tesla",
     employeeEstimate: 140473,
     revenueEstimateUsd: 96773000000,
-    logoUrl: "https://img.logo.dev/tesla.com?token=pk_a8JbZRVFSEOhbnMJnGLXzA&format=png",
+    logoUrl: "https://api.companyenrich.com/logos/v1/tesla.com",
     confidence: 0.9,
     sources: [
       { label: "Wikipedia: Tesla", url: "https://en.wikipedia.org/wiki/Tesla,_Inc.", field: "company" },
