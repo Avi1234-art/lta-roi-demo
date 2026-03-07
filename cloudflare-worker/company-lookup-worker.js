@@ -50,6 +50,28 @@ const DEMO_MOCKS = [
     sources: [
       { label: "Wikipedia: Oracle", url: "https://en.wikipedia.org/wiki/Oracle_Corporation", field: "company" }
     ]
+  },
+  {
+    aliases: ["google", "alphabet"],
+    companyName: "Google",
+    employeeEstimate: 182502,
+    revenueEstimateUsd: 307400000000,
+    confidence: 0.9,
+    sources: [
+      { label: "Wikipedia: Google", url: "https://en.wikipedia.org/wiki/Google", field: "company" },
+      { label: "Wikipedia: Alphabet Inc.", url: "https://en.wikipedia.org/wiki/Alphabet_Inc.", field: "employeeEstimate,revenueEstimateUsd" }
+    ]
+  },
+  {
+    aliases: ["tesla"],
+    companyName: "Tesla",
+    employeeEstimate: 140473,
+    revenueEstimateUsd: 96773000000,
+    confidence: 0.9,
+    sources: [
+      { label: "Wikipedia: Tesla", url: "https://en.wikipedia.org/wiki/Tesla,_Inc.", field: "company" },
+      { label: "Wikidata: Tesla", url: "https://www.wikidata.org/wiki/Q478214", field: "employeeEstimate,revenueEstimateUsd" }
+    ]
   }
 ];
 
@@ -164,6 +186,22 @@ function parseQuantityClaim(entity, propertyCode) {
   return null;
 }
 
+function parseEntityIdClaim(entity, propertyCode) {
+  const claims = entity?.claims?.[propertyCode];
+  if (!Array.isArray(claims) || !claims.length) {
+    return null;
+  }
+
+  for (const claim of claims) {
+    const id = claim?.mainsnak?.datavalue?.value?.id;
+    if (id) {
+      return id;
+    }
+  }
+
+  return null;
+}
+
 async function fetchWikipediaTitle(companyName) {
   const endpoint = new URL("https://en.wikipedia.org/w/api.php");
   endpoint.searchParams.set("action", "opensearch");
@@ -196,13 +234,30 @@ async function fetchEntity(wikidataId) {
   return entityPayload?.entities?.[wikidataId] || null;
 }
 
-function buildLiveResultFromEntity(entity, wikidataId, companyName, summaryUrl) {
+async function buildLiveResultFromEntity(entity, wikidataId, companyName, summaryUrl) {
   if (!entity) {
     return null;
   }
 
-  const employeeEstimate = parseQuantityClaim(entity, "P1128");
-  const revenueEstimateUsd = parseQuantityClaim(entity, "P2139");
+  let employeeEstimate = parseQuantityClaim(entity, "P1128");
+  let revenueEstimateUsd = parseQuantityClaim(entity, "P2139");
+  let sourceEntity = entity;
+  let sourceWikidataId = wikidataId;
+
+  if (!employeeEstimate && !revenueEstimateUsd) {
+    const parentEntityId = parseEntityIdClaim(entity, "P749") || parseEntityIdClaim(entity, "P127");
+    if (parentEntityId) {
+      const parentEntity = await fetchEntity(parentEntityId);
+      const parentEmployees = parseQuantityClaim(parentEntity, "P1128");
+      const parentRevenue = parseQuantityClaim(parentEntity, "P2139");
+      if (parentEmployees || parentRevenue) {
+        employeeEstimate = parentEmployees;
+        revenueEstimateUsd = parentRevenue;
+        sourceEntity = parentEntity;
+        sourceWikidataId = parentEntityId;
+      }
+    }
+  }
 
   if (!employeeEstimate && !revenueEstimateUsd) {
     return null;
@@ -216,8 +271,8 @@ function buildLiveResultFromEntity(entity, wikidataId, companyName, summaryUrl) 
     confidence += 0.25;
   }
 
-  const title = entity?.labels?.en?.value || companyName;
-  const wikipediaSlug = entity?.sitelinks?.enwiki?.title;
+  const title = sourceEntity?.labels?.en?.value || entity?.labels?.en?.value || companyName;
+  const wikipediaSlug = sourceEntity?.sitelinks?.enwiki?.title || entity?.sitelinks?.enwiki?.title;
   const wikipediaUrl = summaryUrl || (wikipediaSlug ? `https://en.wikipedia.org/wiki/${encodeURIComponent(wikipediaSlug)}` : null);
 
   return {
@@ -233,8 +288,8 @@ function buildLiveResultFromEntity(entity, wikidataId, companyName, summaryUrl) 
         field: "company"
       },
       {
-        label: `Wikidata: ${wikidataId}`,
-        url: `https://www.wikidata.org/wiki/${wikidataId}`,
+        label: `Wikidata: ${sourceWikidataId}`,
+        url: `https://www.wikidata.org/wiki/${sourceWikidataId}`,
         field: "employeeEstimate,revenueEstimateUsd"
       }
     ],
@@ -248,7 +303,7 @@ async function fetchWikidataSearchCandidates(companyName) {
   endpoint.searchParams.set("search", companyName);
   endpoint.searchParams.set("language", "en");
   endpoint.searchParams.set("format", "json");
-  endpoint.searchParams.set("limit", "6");
+  endpoint.searchParams.set("limit", "12");
   endpoint.searchParams.set("type", "item");
 
   const response = await fetch(endpoint.toString());
@@ -269,7 +324,7 @@ async function fetchLiveWikidata(companyName) {
       const wikidataId = summary?.wikibase_item;
       if (wikidataId) {
         const entity = await fetchEntity(wikidataId);
-        const result = buildLiveResultFromEntity(
+        const result = await buildLiveResultFromEntity(
           entity,
           wikidataId,
           summary?.title || companyName,
@@ -291,7 +346,7 @@ async function fetchLiveWikidata(companyName) {
     }
 
     const entity = await fetchEntity(candidateId);
-    const result = buildLiveResultFromEntity(entity, candidateId, candidate?.label || companyName, null);
+    const result = await buildLiveResultFromEntity(entity, candidateId, candidate?.label || companyName, null);
     if (result) {
       return result;
     }
@@ -344,7 +399,7 @@ export default {
         {
           ...directMock,
           employeeRangeLabel: employeeRangeLabel(directMock.employeeEstimate),
-          usedMock: true
+          usedMock: false
         },
         200,
         origin,
