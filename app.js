@@ -7,6 +7,17 @@ const SCENARIO_LABELS = {
   high: "High"
 };
 
+const SCENARIO_COLORS = {
+  bg: ["rgba(239, 68, 68, 0.7)", "rgba(234, 179, 8, 0.7)", "rgba(34, 197, 94, 0.7)"],
+  border: ["rgba(239, 68, 68, 1)", "rgba(234, 179, 8, 1)", "rgba(34, 197, 94, 1)"]
+};
+
+const BREAKDOWN_COLORS = {
+  time: ["rgba(248, 113, 113, 0.65)", "rgba(250, 204, 21, 0.65)", "rgba(74, 222, 128, 0.65)"],
+  tools: ["rgba(239, 68, 68, 0.75)", "rgba(234, 179, 8, 0.75)", "rgba(34, 197, 94, 0.75)"],
+  revenue: ["rgba(185, 28, 28, 0.7)", "rgba(161, 120, 5, 0.7)", "rgba(21, 128, 61, 0.7)"]
+};
+
 const FIELD_IDS = [
   "companySizeEmployees",
   "currentToolingAnnualUsd",
@@ -296,17 +307,76 @@ function formatMonths(value) {
   return `${new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 }).format(value)} months`;
 }
 
+let previousKpiValues = {
+  roiPct: 0, paybackMonths: 0, totalBenefit: 0, netBenefit: 0,
+  timeSavings: 0, toolSavings: 0, revenueLift: 0, persanaCost: 0
+};
+
+function animateValue(element, start, end, duration, formatter) {
+  if (Math.abs(start - end) < 0.01) { element.textContent = formatter(end); return; }
+  const startTime = performance.now();
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function tick(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const current = start + (end - start) * easeOutCubic(progress);
+    element.textContent = formatter(current);
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function updateImpactMeter(roiPct) {
+  const fill = document.getElementById("impactFill");
+  const label = document.getElementById("impactLabel");
+  if (!fill || !label) return;
+
+  let level, height, color;
+  if (roiPct < 200) {
+    level = "low"; height = "33%"; color = "#ef4444";
+  } else if (roiPct < 800) {
+    level = "medium"; height = "66%"; color = "#eab308";
+  } else {
+    level = "high"; height = "100%"; color = "#22c55e";
+  }
+
+  fill.style.height = height;
+  fill.style.background = color;
+  label.textContent = level.charAt(0).toUpperCase() + level.slice(1);
+  label.dataset.level = level;
+}
+
 function renderKpis(result) {
   outputNodes.activeScenarioName.textContent = SCENARIO_LABELS[activeScenario];
-  outputNodes.kpiRoiPct.textContent = formatPercent(result.roiPct);
-  outputNodes.kpiPaybackMonths.textContent = formatMonths(result.paybackMonths);
-  outputNodes.kpiTotalBenefit.textContent = formatCurrency(result.totalBenefitUsd);
-  outputNodes.kpiNetBenefit.textContent = formatCurrency(result.netBenefitUsd);
+  const duration = 600;
 
-  outputNodes.activeTimeSavings.textContent = formatCurrency(result.timeSavingsValueUsd);
-  outputNodes.activeToolSavings.textContent = formatCurrency(result.toolSavingsUsd);
-  outputNodes.activeRevenueLift.textContent = formatCurrency(result.revenueLiftUsd);
-  outputNodes.activePersanaCost.textContent = formatCurrency(result.assumptions.persanaAnnualCostUsd);
+  animateValue(outputNodes.kpiRoiPct, previousKpiValues.roiPct, result.roiPct, duration, formatPercent);
+
+  if (Number.isFinite(result.paybackMonths)) {
+    animateValue(outputNodes.kpiPaybackMonths, previousKpiValues.paybackMonths, result.paybackMonths, duration, formatMonths);
+  } else {
+    outputNodes.kpiPaybackMonths.textContent = "Not reached";
+  }
+
+  animateValue(outputNodes.kpiTotalBenefit, previousKpiValues.totalBenefit, result.totalBenefitUsd, duration, formatCurrency);
+  animateValue(outputNodes.kpiNetBenefit, previousKpiValues.netBenefit, result.netBenefitUsd, duration, formatCurrency);
+  animateValue(outputNodes.activeTimeSavings, previousKpiValues.timeSavings, result.timeSavingsValueUsd, duration, formatCurrency);
+  animateValue(outputNodes.activeToolSavings, previousKpiValues.toolSavings, result.toolSavingsUsd, duration, formatCurrency);
+  animateValue(outputNodes.activeRevenueLift, previousKpiValues.revenueLift, result.revenueLiftUsd, duration, formatCurrency);
+  animateValue(outputNodes.activePersanaCost, previousKpiValues.persanaCost, result.assumptions.persanaAnnualCostUsd, duration, formatCurrency);
+
+  previousKpiValues = {
+    roiPct: result.roiPct,
+    paybackMonths: Number.isFinite(result.paybackMonths) ? result.paybackMonths : 0,
+    totalBenefit: result.totalBenefitUsd,
+    netBenefit: result.netBenefitUsd,
+    timeSavings: result.timeSavingsValueUsd,
+    toolSavings: result.toolSavingsUsd,
+    revenueLift: result.revenueLiftUsd,
+    persanaCost: result.assumptions.persanaAnnualCostUsd
+  };
+
+  updateImpactMeter(result.roiPct);
 }
 
 function buildChartTheme() {
@@ -355,8 +425,8 @@ function createOrUpdateCharts(resultsByScenario) {
           label: "ROI %",
           data: roiData,
           borderWidth: 1,
-          borderColor: theme.accent,
-          backgroundColor: "rgba(220, 159, 133, 0.7)",
+          borderColor: SCENARIO_COLORS.border,
+          backgroundColor: SCENARIO_COLORS.bg,
           borderRadius: 6
         }]
       },
@@ -381,19 +451,19 @@ function createOrUpdateCharts(resultsByScenario) {
           {
             label: "Time savings",
             data: breakdownData.time,
-            backgroundColor: "rgba(220, 159, 133, 0.75)",
+            backgroundColor: BREAKDOWN_COLORS.time,
             borderRadius: 4
           },
           {
             label: "Tool savings",
             data: breakdownData.tools,
-            backgroundColor: "rgba(229, 173, 148, 0.65)",
+            backgroundColor: BREAKDOWN_COLORS.tools,
             borderRadius: 4
           },
           {
             label: "Revenue lift",
             data: breakdownData.revenue,
-            backgroundColor: "rgba(102, 71, 59, 0.72)",
+            backgroundColor: BREAKDOWN_COLORS.revenue,
             borderRadius: 4
           }
         ]
@@ -431,8 +501,8 @@ function createOrUpdateCharts(resultsByScenario) {
           label: "Payback (months)",
           data: paybackData,
           borderWidth: 1,
-          borderColor: theme.foreground,
-          backgroundColor: "rgba(182, 165, 150, 0.5)",
+          borderColor: SCENARIO_COLORS.border,
+          backgroundColor: SCENARIO_COLORS.bg,
           borderRadius: 6
         }]
       },
@@ -921,6 +991,244 @@ function hideAutocomplete() {
   }
 }
 
+/* ——— Compare companies ——— */
+function computeComparisonOutput(scenario, employees, revenueUsd) {
+  const assumptions = readScenarioAssumptions(scenario);
+  const tooling = estimateToolingSpendFromEmployees(employees);
+  const salesVolume = estimateAddressableSalesVolume(employees, revenueUsd);
+  const tierDefaults = getTierDefaults();
+  const tierKey = getTierKey(employees);
+  const persanaCost = autoSyncTierCostsCheckbox.checked ? tierDefaults[tierKey] : assumptions.persanaAnnualCostUsd;
+
+  const estimatedReps = clamp(employees * assumptions.repCountRatio, 1, MAX_ESTIMATED_REPS);
+  const repHourlyCost = assumptions.repFullyLoadedAnnualUsd / 2000;
+  const annualHoursSaved = estimatedReps * assumptions.timeSavedHoursPerRepPerWeek * 52;
+  const timeSavingsValueUsd = annualHoursSaved * repHourlyCost;
+  const toolSavingsUsd = tooling * (assumptions.toolsReplacedPct / 100);
+  const revenueLiftUsd = salesVolume * (assumptions.conversionLiftPct / 100);
+  const totalBenefitUsd = timeSavingsValueUsd + toolSavingsUsd + revenueLiftUsd;
+  const netBenefitUsd = totalBenefitUsd - persanaCost;
+  const roiPct = persanaCost > 0 ? (netBenefitUsd / persanaCost) * 100 : 0;
+  const paybackMonths = persanaCost > 0 && totalBenefitUsd > 0 ? persanaCost / (totalBenefitUsd / 12) : null;
+
+  return { roiPct, paybackMonths, totalBenefitUsd, netBenefitUsd };
+}
+
+function openComparePicker() {
+  const existing = document.getElementById("comparePickerOverlay");
+  if (existing) existing.remove();
+
+  const overlay = document.createElement("div");
+  overlay.id = "comparePickerOverlay";
+  overlay.className = "compare-picker";
+  overlay.innerHTML = `
+    <div class="demo-picker-inner">
+      <h2 class="demo-picker-title">Compare With</h2>
+      <p class="demo-picker-sub">Select a company to compare against the current data</p>
+      <div class="demo-picker-grid" id="comparePickerGrid"></div>
+      <button class="demo-picker-cancel" id="comparePickerCancel">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const grid = overlay.querySelector("#comparePickerGrid");
+  DEFAULT_MOCKS.forEach((mock) => {
+    const card = document.createElement("button");
+    card.className = "demo-picker-card";
+    card.dataset.company = mock.companyName;
+    const domain = mock.logoUrl.replace("https://logo.clearbit.com/", "");
+    card.innerHTML = `
+      <img class="demo-picker-logo" src="${mock.logoUrl}" alt="${mock.companyName}"
+           onerror="this.src='https://www.google.com/s2/favicons?domain=${domain}&sz=128'" />
+      <span class="demo-picker-name">${mock.companyName}</span>
+    `;
+    grid.appendChild(card);
+  });
+
+  requestAnimationFrame(() => overlay.classList.add("is-active"));
+
+  overlay.addEventListener("click", (e) => {
+    const card = e.target.closest(".demo-picker-card");
+    if (card) {
+      overlay.classList.remove("is-active");
+      setTimeout(() => overlay.remove(), 300);
+      runComparison(card.dataset.company);
+      return;
+    }
+    if (e.target.id === "comparePickerCancel" || e.target === overlay) {
+      overlay.classList.remove("is-active");
+      setTimeout(() => overlay.remove(), 300);
+    }
+  });
+}
+
+function runComparison(companyName) {
+  const mock = DEFAULT_MOCKS.find((m) => m.companyName === companyName);
+  if (!mock) return;
+
+  const currentResult = computeScenarioOutput(activeScenario);
+  const currentName = lookupCompanyNameEl?.textContent || "Current Company";
+  const currentLogo = companyLogo?.src || "";
+
+  const compareResult = computeComparisonOutput(activeScenario, mock.employeeEstimate, mock.revenueEstimateUsd);
+
+  showComparisonCard(currentName, currentLogo, currentResult, mock.companyName, mock.logoUrl, compareResult);
+}
+
+function showComparisonCard(nameA, logoA, resultA, nameB, logoB, resultB) {
+  const container = document.getElementById("compareResult");
+  if (!container) return;
+
+  const metrics = [
+    { label: "ROI", a: formatPercent(resultA.roiPct), b: formatPercent(resultB.roiPct), aVal: resultA.roiPct, bVal: resultB.roiPct, higher: true },
+    { label: "Payback", a: formatMonths(resultA.paybackMonths), b: formatMonths(resultB.paybackMonths), aVal: resultA.paybackMonths || 999, bVal: resultB.paybackMonths || 999, higher: false },
+    { label: "Total Benefit", a: formatCurrency(resultA.totalBenefitUsd), b: formatCurrency(resultB.totalBenefitUsd), aVal: resultA.totalBenefitUsd, bVal: resultB.totalBenefitUsd, higher: true },
+    { label: "Net Benefit", a: formatCurrency(resultA.netBenefitUsd), b: formatCurrency(resultB.netBenefitUsd), aVal: resultA.netBenefitUsd, bVal: resultB.netBenefitUsd, higher: true }
+  ];
+
+  function betterClass(m, side) {
+    const aWins = m.higher ? m.aVal >= m.bVal : m.aVal <= m.bVal;
+    return (side === "a" ? aWins : !aWins) ? " is-better" : "";
+  }
+
+  container.innerHTML = `
+    <h3 class="compare-title">${nameA} vs ${nameB} — ${SCENARIO_LABELS[activeScenario]} Scenario</h3>
+    <div class="compare-grid">
+      <div class="compare-col">
+        <div class="compare-col-head">
+          ${logoA ? `<img class="compare-col-logo" src="${logoA}" alt="" onerror="this.style.display='none'" />` : ""}
+          <span class="compare-col-name">${nameA}</span>
+        </div>
+        ${metrics.map((m) => `<div class="compare-row"><span class="compare-row-label">${m.label}</span><span class="compare-row-value${betterClass(m, "a")}">${m.a}</span></div>`).join("")}
+      </div>
+      <div class="compare-col">
+        <div class="compare-col-head">
+          ${logoB ? `<img class="compare-col-logo" src="${logoB}" alt="" onerror="this.style.display='none'" />` : ""}
+          <span class="compare-col-name">${nameB}</span>
+        </div>
+        ${metrics.map((m) => `<div class="compare-row"><span class="compare-row-label">${m.label}</span><span class="compare-row-value${betterClass(m, "b")}">${m.b}</span></div>`).join("")}
+      </div>
+    </div>
+  `;
+  container.classList.remove("hidden");
+  container.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/* ——— PDF export ——— */
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+async function exportPdf() {
+  const pdfBtn = document.getElementById("pdfBtn");
+  pdfBtn.textContent = "Generating...";
+  pdfBtn.disabled = true;
+
+  try {
+    if (!window.html2canvas) {
+      await loadScript("https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js");
+    }
+    if (!window.jspdf) {
+      await loadScript("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js");
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    /* Dark background */
+    doc.setFillColor(24, 24, 24);
+    doc.rect(0, 0, pageWidth, pageHeight, "F");
+
+    /* Header */
+    doc.setTextColor(232, 221, 208);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("Persana AI", 20, 25);
+    doc.setFontSize(14);
+    doc.setTextColor(182, 165, 150);
+    doc.text("ROI Analysis Report", 20, 34);
+
+    /* Company + date */
+    const companyName = lookupCompanyNameEl?.textContent || "Company";
+    const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    doc.setFontSize(10);
+    doc.setTextColor(154, 125, 110);
+    doc.text(`${companyName} \u2014 ${date}`, 20, 42);
+    doc.text(`Scenario: ${SCENARIO_LABELS[activeScenario]}`, 20, 48);
+
+    /* Divider */
+    doc.setDrawColor(53, 33, 26);
+    doc.line(20, 53, pageWidth - 20, 53);
+
+    /* KPI summary */
+    const result = computeScenarioOutput(activeScenario);
+    doc.setFontSize(12);
+    doc.setTextColor(220, 159, 133);
+    doc.text("Key Metrics", 20, 63);
+
+    const kpis = [
+      ["ROI", formatPercent(result.roiPct)],
+      ["Payback Period", formatMonths(result.paybackMonths)],
+      ["Total Annual Benefit", formatCurrency(result.totalBenefitUsd)],
+      ["Net Annual Benefit", formatCurrency(result.netBenefitUsd)],
+      ["Time Savings", formatCurrency(result.timeSavingsValueUsd)],
+      ["Tool Consolidation", formatCurrency(result.toolSavingsUsd)],
+      ["Revenue Lift", formatCurrency(result.revenueLiftUsd)],
+      ["Persana Annual Cost", formatCurrency(result.assumptions.persanaAnnualCostUsd)]
+    ];
+
+    doc.setFontSize(10);
+    let yPos = 72;
+    kpis.forEach(([label, value]) => {
+      doc.setTextColor(182, 165, 150);
+      doc.text(label, 24, yPos);
+      doc.setTextColor(232, 221, 208);
+      doc.text(value, pageWidth - 24, yPos, { align: "right" });
+      yPos += 7;
+    });
+
+    /* Charts screenshot */
+    yPos += 5;
+    doc.setDrawColor(53, 33, 26);
+    doc.line(20, yPos, pageWidth - 20, yPos);
+    yPos += 8;
+
+    doc.setFontSize(12);
+    doc.setTextColor(220, 159, 133);
+    doc.text("Scenario Comparison Charts", 20, yPos);
+    yPos += 6;
+
+    const chartsGrid = document.querySelector(".charts-grid");
+    if (chartsGrid) {
+      const canvas = await window.html2canvas(chartsGrid, { backgroundColor: "#181818", scale: 2 });
+      const imgData = canvas.toDataURL("image/png");
+      const imgWidth = pageWidth - 40;
+      const imgHeight = (canvas.height / canvas.width) * imgWidth;
+      doc.addImage(imgData, "PNG", 20, yPos, imgWidth, Math.min(imgHeight, 80));
+    }
+
+    /* Footer */
+    doc.setFontSize(8);
+    doc.setTextColor(154, 125, 110);
+    doc.text("Generated by Persana AI ROI Calculator \u2014 persana.ai", pageWidth / 2, pageHeight - 12, { align: "center" });
+
+    doc.save(`Persana_ROI_${companyName.replace(/\s+/g, "_")}_${activeScenario}.pdf`);
+  } catch (err) {
+    console.error("PDF export failed:", err);
+  } finally {
+    pdfBtn.textContent = "Download PDF Report";
+    pdfBtn.disabled = false;
+  }
+}
+
 function registerEventHandlers() {
   form.addEventListener("input", onInputChanged);
   form.addEventListener("change", onInputChanged);
@@ -960,6 +1268,12 @@ function registerEventHandlers() {
     recalculate();
   });
   initInfoTooltips();
+
+  /* Compare & PDF buttons */
+  const compareBtn = document.getElementById("compareBtn");
+  if (compareBtn) compareBtn.addEventListener("click", openComparePicker);
+  const pdfBtn = document.getElementById("pdfBtn");
+  if (pdfBtn) pdfBtn.addEventListener("click", exportPdf);
 }
 
 function init() {

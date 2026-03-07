@@ -83,12 +83,10 @@
     <!-- Ambient grain overlay -->
     <div class="lp-grain" aria-hidden="true"></div>
 
-    <!-- Exit transition overlay -->
-    <div class="lp-exit-overlay" id="exitOverlay">
-        <canvas id="exitCanvas"></canvas>
-    </div>
+    <!-- Smooth fade overlay for page transitions -->
+    <div class="lp-exit-overlay" id="exitOverlay"></div>
 
-    <!-- Demo company picker (shown over animation) -->
+    <!-- Demo company picker -->
     <div class="lp-demo-picker" id="demoPicker">
         <div class="lp-demo-picker-inner">
             <h2 class="lp-demo-picker-title">Choose a Company</h2>
@@ -132,135 +130,41 @@
     <script>
         (function () {
             var overlay = document.getElementById("exitOverlay");
-            var canvas = document.getElementById("exitCanvas");
             var picker = document.getElementById("demoPicker");
-            if (!overlay || !canvas) return;
 
-            var animRunning = false;
-            var animId;
-
-            /* Start the particle animation loop (runs continuously in background) */
-            function startParticleAnimation() {
-                if (animRunning) return;
-                animRunning = true;
-                overlay.classList.add("is-active");
-
-                var ctx = canvas.getContext("2d");
-                var DPR = window.devicePixelRatio || 1;
-                var W = window.innerWidth;
-                var H = window.innerHeight;
-                canvas.width = W * DPR;
-                canvas.height = H * DPR;
-                canvas.style.width = W + "px";
-                canvas.style.height = H + "px";
-                ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-                var particles = [];
-                for (var i = 0; i < 60; i++) {
-                    particles.push({
-                        x: Math.random() * W, y: Math.random() * H,
-                        vx: (Math.random() - 0.5) * 1.2, vy: (Math.random() - 0.5) * 1.2,
-                        r: Math.random() * 2.5 + 1, alpha: Math.random() * 0.5 + 0.3
-                    });
-                }
-
-                var startTime = performance.now();
-                var FADE_IN = 800;
-
-                function draw(now) {
-                    var elapsed = now - startTime;
-                    /* Fade in over 800ms, then hold at full */
-                    var globalAlpha = Math.min(elapsed / FADE_IN, 1);
-
-                    ctx.clearRect(0, 0, W, H);
-
-                    var grad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.6);
-                    grad.addColorStop(0, "rgba(220, 159, 133, " + (0.06 * globalAlpha) + ")");
-                    grad.addColorStop(1, "rgba(24, 24, 24, " + globalAlpha + ")");
-                    ctx.fillStyle = grad;
-                    ctx.fillRect(0, 0, W, H);
-
-                    for (var k = 0; k < particles.length; k++) {
-                        var p = particles[k];
-                        p.x += p.vx; p.y += p.vy;
-                        if (p.x < -5) p.x = W + 5;
-                        if (p.x > W + 5) p.x = -5;
-                        if (p.y < -5) p.y = H + 5;
-                        if (p.y > H + 5) p.y = -5;
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                        ctx.fillStyle = "rgba(220, 159, 133, " + (p.alpha * globalAlpha) + ")";
-                        ctx.fill();
-                    }
-
-                    for (var a = 0; a < particles.length; a++) {
-                        for (var b = a + 1; b < particles.length; b++) {
-                            var dx = particles[a].x - particles[b].x;
-                            var dy = particles[a].y - particles[b].y;
-                            var dist = Math.sqrt(dx * dx + dy * dy);
-                            if (dist < 120) {
-                                ctx.beginPath();
-                                ctx.moveTo(particles[a].x, particles[a].y);
-                                ctx.lineTo(particles[b].x, particles[b].y);
-                                ctx.strokeStyle = "rgba(220, 159, 133, " + ((1 - dist / 120) * 0.15 * globalAlpha) + ")";
-                                ctx.lineWidth = 0.5;
-                                ctx.stroke();
-                            }
-                        }
-                    }
-
-                    if (animRunning) animId = requestAnimationFrame(draw);
-                }
-                animId = requestAnimationFrame(draw);
+            /* Smooth CSS fade then navigate */
+            function smoothNavigate(dest) {
+                if (overlay) overlay.classList.add("is-active");
+                setTimeout(function () { window.location.href = dest; }, 350);
             }
 
-            /* Stop animation and navigate */
-            function navigateTo(dest) {
-                animRunning = false;
-                cancelAnimationFrame(animId);
-                window.location.href = dest;
-            }
-
-            /* --- Calculator button: play exit animation then navigate --- */
+            /* Calculator button */
             var calcBtn = document.getElementById("launchCalcBtn");
             if (calcBtn) {
                 calcBtn.addEventListener("click", function (e) {
                     e.preventDefault();
-                    startParticleAnimation();
-                    setTimeout(function () { navigateTo(calcBtn.href); }, 1400);
+                    smoothNavigate(calcBtn.href);
                 });
             }
 
-            /* --- Demo button: show particles + picker, navigate on selection --- */
+            /* Demo button: show picker, navigate on selection */
             var demoBtn = document.getElementById("runDemoBtn");
             if (demoBtn && picker) {
                 demoBtn.addEventListener("click", function (e) {
                     e.preventDefault();
-                    startParticleAnimation();
-                    /* Fade in picker after particles start covering the screen */
-                    setTimeout(function () {
-                        picker.classList.add("is-active");
-                    }, 600);
+                    picker.classList.add("is-active");
                 });
 
-                /* Company card clicks */
                 picker.addEventListener("click", function (e) {
                     var card = e.target.closest(".lp-demo-picker-card");
                     if (card) {
                         var company = card.dataset.company;
                         picker.classList.remove("is-active");
-                        var dest = "/lta-roi-demo/calculator.html?demo=1&company=" + company;
-                        setTimeout(function () { navigateTo(dest); }, 400);
+                        smoothNavigate("/lta-roi-demo/calculator.html?demo=1&company=" + company);
                         return;
                     }
                     if (e.target.id === "demoPickerCancel") {
                         picker.classList.remove("is-active");
-                        /* Stop animation and restore page */
-                        setTimeout(function () {
-                            animRunning = false;
-                            cancelAnimationFrame(animId);
-                            overlay.classList.remove("is-active");
-                        }, 300);
                     }
                 });
             }

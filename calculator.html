@@ -226,8 +226,18 @@
         <span class="label">Results</span>
         <span class="rule"></span>
       </div>
-      <h2 id="results-heading">Scenario: <span id="activeScenarioName">Low</span></h2>
-      <p class="results-sub">See how Persana AI would impact your business performance</p>
+      <div class="results-header">
+        <div>
+          <h2 id="results-heading">Scenario: <span id="activeScenarioName">Low</span></h2>
+          <p class="results-sub">See how Persana AI would impact your business performance</p>
+        </div>
+        <div class="impact-meter" id="impactMeter">
+          <div class="impact-meter-track">
+            <div class="impact-meter-fill" id="impactFill"></div>
+          </div>
+          <span class="impact-meter-label" id="impactLabel">—</span>
+        </div>
+      </div>
 
       <div class="kpi-grid">
         <article class="kpi-card">
@@ -304,6 +314,15 @@
           </div>
         </article>
       </div>
+    </section>
+
+    <!-- Compare & export -->
+    <section class="section" id="compareSection">
+      <div class="action-bar">
+        <button type="button" class="action-btn" id="compareBtn">Compare Companies</button>
+        <button type="button" class="action-btn action-btn--accent" id="pdfBtn">Download PDF Report</button>
+      </div>
+      <div id="compareResult" class="compare-result hidden"></div>
     </section>
 
     <!-- Footer with Persana link -->

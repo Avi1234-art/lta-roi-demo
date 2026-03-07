@@ -91,7 +91,7 @@ body {
     white-space: nowrap;
 }
 
-/* ——— Exit transition overlay ——— */
+/* ——— Exit transition overlay (smooth dark fade) ——— */
 .lp-exit-overlay {
     position: fixed;
     inset: 0;
@@ -99,17 +99,12 @@ body {
     pointer-events: none;
     opacity: 0;
     background: var(--lp-bg);
-    transition: opacity 100ms;
+    transition: opacity 350ms ease-out;
 }
 
 .lp-exit-overlay.is-active {
     pointer-events: all;
     opacity: 1;
-}
-
-.lp-exit-overlay canvas {
-    width: 100%;
-    height: 100%;
 }
 
 /* ——— Demo company picker overlay ——— */

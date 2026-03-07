@@ -424,8 +424,8 @@
         /* Check if a company was pre-selected from the landing page */
         const companyKey = params.get("company");
 
-        /* Wait for page transition to finish */
-        const delay = 2400;
+        /* Small delay for page to settle */
+        const delay = 400;
         setTimeout(() => {
             if (companyKey && DEMO_COMPANIES.find((c) => c.key === companyKey)) {
                 /* Company was chosen on landing page — start demo directly */
