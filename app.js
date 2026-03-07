@@ -593,22 +593,21 @@ function createOrUpdateCharts(resultsByScenario) {
             label: "Time savings",
             data: breakdownData.time,
             backgroundColor: BREAKDOWN_COLORS.time,
-            borderRadius: 4,
+            borderRadius: 0,
             maxBarThickness: 56
           },
           {
             label: "Tool savings",
             data: breakdownData.tools,
             backgroundColor: BREAKDOWN_COLORS.tools,
-            borderRadius: 4,
+            borderRadius: 0,
             maxBarThickness: 56
           },
           {
             label: "Revenue lift",
             data: breakdownData.revenue,
             backgroundColor: BREAKDOWN_COLORS.revenue,
-            borderRadius: 8,
-            borderSkipped: false,
+            borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
             maxBarThickness: 56
           }
         ]
@@ -1338,19 +1337,24 @@ function showComparisonCard(nameA, logoA, resultA, nameB, logoB, resultB) {
     return (side === "a" ? aWins : !aWins) ? " is-better" : "";
   }
 
+  function logoFallback(name) {
+    const domain = (name || "").toLowerCase().replace(/[^a-z0-9]/g, "") + ".com";
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+  }
+
   container.innerHTML = `
     <h3 class="compare-title">${nameA} vs ${nameB} — ${SCENARIO_LABELS[activeScenario]} Scenario</h3>
     <div class="compare-grid">
       <div class="compare-col">
         <div class="compare-col-head">
-          ${logoA ? `<img class="compare-col-logo" src="${logoA}" alt="" onerror="this.style.display='none'" />` : ""}
+          ${logoA ? `<img class="compare-col-logo" src="${logoA}" alt="" onerror="this.src='${logoFallback(nameA)}'" />` : ""}
           <span class="compare-col-name">${nameA}</span>
         </div>
         ${metrics.map((m) => `<div class="compare-row"><span class="compare-row-label">${m.label}</span><span class="compare-row-value${betterClass(m, "a")}">${m.a}</span></div>`).join("")}
       </div>
       <div class="compare-col">
         <div class="compare-col-head">
-          ${logoB ? `<img class="compare-col-logo" src="${logoB}" alt="" onerror="this.style.display='none'" />` : ""}
+          ${logoB ? `<img class="compare-col-logo" src="${logoB}" alt="" onerror="this.src='${logoFallback(nameB)}'" />` : ""}
           <span class="compare-col-name">${nameB}</span>
         </div>
         ${metrics.map((m) => `<div class="compare-row"><span class="compare-row-label">${m.label}</span><span class="compare-row-value${betterClass(m, "b")}">${m.b}</span></div>`).join("")}
