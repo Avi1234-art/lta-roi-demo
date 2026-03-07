@@ -112,6 +112,7 @@ const confidenceBadge = document.getElementById("confidenceBadge");
 const companyLogoWrap = document.getElementById("companyLogoWrap");
 const companyLogo = document.getElementById("companyLogo");
 const autoSyncTierCostsCheckbox = document.getElementById("autoSyncTierCosts");
+const lookupCompanyNameEl = document.getElementById("lookupCompanyName");
 const AI_PLACEHOLDER_COMPANIES = ["Google", "Tesla", "Microsoft", "Salesforce", "HubSpot"];
 const AI_PLACEHOLDER_PREFIX = "Search for ";
 
@@ -488,19 +489,21 @@ function setCoreInputsVisible(visible) {
 }
 
 function estimateToolingSpendFromEmployees(employeeEstimate) {
-  const estimatedReps = clamp(employeeEstimate * 0.002, 6, MAX_ESTIMATED_REPS);
-  const tooling = estimatedReps * 4500;
-  return roundToNearest(clamp(tooling, 30000, 3000000), 1000);
+  const estimatedReps = clamp(employeeEstimate * 0.002, 3, MAX_ESTIMATED_REPS);
+  const tooling = estimatedReps * 2500;
+  return roundToNearest(clamp(tooling, 20000, 800000), 1000);
 }
 
 function estimateAddressableSalesVolume(employeeEstimate, revenueEstimateUsd) {
   if (Number.isFinite(revenueEstimateUsd) && revenueEstimateUsd > 0) {
-    const scaled = revenueEstimateUsd * 0.0002;
-    return roundToNearest(clamp(scaled, 1500000, 40000000), 10000);
+    const billions = revenueEstimateUsd / 1e9;
+    const fraction = billions > 1 ? 0.0002 / (1 + Math.log10(billions)) : 0.0002;
+    const scaled = revenueEstimateUsd * fraction;
+    return roundToNearest(clamp(scaled, 500000, 15000000), 10000);
   }
 
-  const fallback = employeeEstimate * 35000;
-  return roundToNearest(clamp(fallback, 1500000, 25000000), 10000);
+  const fallback = Math.min(employeeEstimate * 12000, 10000000);
+  return roundToNearest(clamp(fallback, 500000, 10000000), 10000);
 }
 
 function findDemoMock(companyName) {
@@ -588,6 +591,10 @@ function applyLookupResult(data) {
   setCoreInputsVisible(true);
   lookupMeta.classList.remove("hidden");
 
+  if (lookupCompanyNameEl) {
+    lookupCompanyNameEl.textContent = data.companyName || "";
+  }
+
   if (data.logoUrl) {
     companyLogo.src = data.logoUrl;
     companyLogo.alt = `${data.companyName || "Company"} logo`;
@@ -649,10 +656,17 @@ function tickPlaceholderAnimation() {
     if (placeholderHoldTicks >= 10) {
       placeholderPhase = "deleting";
     }
-  } else {
+  } else if (placeholderPhase === "deleting") {
     placeholderSuffixCount -= 1;
     if (placeholderSuffixCount <= 0) {
       placeholderSuffixCount = 0;
+      placeholderPhase = "pause";
+      placeholderHoldTicks = 0;
+    }
+  } else {
+    /* pause phase — brief empty state before typing next company */
+    placeholderHoldTicks += 1;
+    if (placeholderHoldTicks >= 5) {
       placeholderPhase = "typing";
       placeholderCompanyIndex = (placeholderCompanyIndex + 1) % AI_PLACEHOLDER_COMPANIES.length;
     }
@@ -794,6 +808,53 @@ function onInputChanged(event) {
   recalculate();
 }
 
+function initInfoTooltips() {
+  const tooltip = document.createElement("div");
+  tooltip.className = "info-tooltip";
+  document.body.appendChild(tooltip);
+
+  let hideTimer = null;
+
+  function showTooltip(dot) {
+    clearTimeout(hideTimer);
+    const text = dot.getAttribute("data-help");
+    if (!text) return;
+    tooltip.textContent = text;
+    tooltip.classList.add("is-visible");
+
+    const rect = dot.getBoundingClientRect();
+    const tooltipWidth = 240;
+    let left = rect.left + rect.width / 2 - tooltipWidth / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - tooltipWidth - 8));
+    const top = rect.top - 8;
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+    tooltip.style.transform = "translateY(-100%)";
+  }
+
+  function hideTooltip() {
+    hideTimer = setTimeout(() => {
+      tooltip.classList.remove("is-visible");
+    }, 80);
+  }
+
+  document.addEventListener("mouseenter", (e) => {
+    if (e.target.closest(".info-dot")) showTooltip(e.target.closest(".info-dot"));
+  }, true);
+
+  document.addEventListener("mouseleave", (e) => {
+    if (e.target.closest(".info-dot")) hideTooltip();
+  }, true);
+
+  document.addEventListener("focusin", (e) => {
+    if (e.target.closest(".info-dot")) showTooltip(e.target.closest(".info-dot"));
+  });
+
+  document.addEventListener("focusout", (e) => {
+    if (e.target.closest(".info-dot")) hideTooltip();
+  });
+}
+
 function registerEventHandlers() {
   form.addEventListener("input", onInputChanged);
   form.addEventListener("change", onInputChanged);
@@ -810,6 +871,7 @@ function registerEventHandlers() {
     syncScenarioCostsFromTier();
     recalculate();
   });
+  initInfoTooltips();
 }
 
 function init() {

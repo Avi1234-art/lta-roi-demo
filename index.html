@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,9 +8,12 @@
   <meta name="description" content="Interactive ROI calculator demo for Persana sales conversations." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@400;500;600&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="/lta-roi-demo/styles.css" />
 </head>
+
 <body>
   <div class="ambient-glow" aria-hidden="true"></div>
   <main class="page-shell">
@@ -21,7 +25,8 @@
       </div>
       <h1>Persana ROI Calculator</h1>
       <p class="hero-copy">
-        Enter a prospect, auto-fill public company context, and walk through Low, Base, and High outcomes during live sales conversations.
+        Enter a prospect, auto-fill public company context, and walk through Low, Base, and High outcomes during live
+        sales conversations.
       </p>
     </header>
 
@@ -49,13 +54,16 @@
         <div class="input-group company-group">
           <label for="companyName">Company name</label>
           <div id="companySearchRow" class="inline-input-row">
-            <input id="companyName" name="companyName" type="text" autocomplete="organization" placeholder="Search for Google..." />
+            <input id="companyName" name="companyName" type="text" autocomplete="organization"
+              placeholder="Search for Google..." />
             <button type="button" id="autofillBtn" class="btn-primary hidden">Run AI-powered lookup</button>
           </div>
-          <p id="lookupStatus" class="field-note" role="status" aria-live="polite">Manual mode is on. Enter values directly.</p>
+          <p id="lookupStatus" class="field-note" role="status" aria-live="polite">Manual mode is on. Enter values
+            directly.</p>
           <p id="aiModeNote" class="field-note hidden">
             AI Powered mode uses Wikidata/Wikipedia via Cloudflare Worker:
-            <a href="https://persana-company-lookup.avi-lta-demo.workers.dev/company-lookup" target="_blank" rel="noopener noreferrer">
+            <a href="https://persana-company-lookup.avi-lta-demo.workers.dev/company-lookup" target="_blank"
+              rel="noopener noreferrer">
               data source endpoint
             </a>.
           </p>
@@ -65,11 +73,17 @@
               <div id="companyLogoWrap" class="company-logo-wrap hidden">
                 <img id="companyLogo" alt="" loading="lazy" />
               </div>
-              <p id="confidenceBadge" class="confidence-badge">Confidence: not run</p>
+              <div class="lookup-meta-info">
+                <p id="lookupCompanyName" class="lookup-company-name"></p>
+                <p id="confidenceBadge" class="confidence-badge">Confidence: not run</p>
+              </div>
             </div>
-            <ul id="sourceList" class="source-list">
-              <li>Run AI-powered lookup to attach source references.</li>
-            </ul>
+            <details class="sources-toggle">
+              <summary>View sources</summary>
+              <ul id="sourceList" class="source-list">
+                <li>Run AI-powered lookup to attach source references.</li>
+              </ul>
+            </details>
           </section>
         </div>
 
@@ -77,19 +91,22 @@
           <div class="input-grid">
             <div class="input-group">
               <label for="companySizeEmployees">Company size (employees)</label>
-              <input id="companySizeEmployees" name="companySizeEmployees" type="number" min="1" step="1" value="250" required />
+              <input id="companySizeEmployees" name="companySizeEmployees" type="number" min="1" step="1" value="250"
+                required />
               <p id="companySizeEmployeesError" class="field-error" aria-live="polite"></p>
             </div>
 
             <div class="input-group">
               <label for="currentToolingAnnualUsd">Current tooling spend (USD / year)</label>
-              <input id="currentToolingAnnualUsd" name="currentToolingAnnualUsd" type="number" min="0" step="1000" value="90000" required />
+              <input id="currentToolingAnnualUsd" name="currentToolingAnnualUsd" type="number" min="0" step="1000"
+                value="90000" required />
               <p id="currentToolingAnnualUsdError" class="field-error" aria-live="polite"></p>
             </div>
 
             <div class="input-group">
               <label for="salesVolumeAnnualUsd">Sales volume (USD / year)</label>
-              <input id="salesVolumeAnnualUsd" name="salesVolumeAnnualUsd" type="number" min="0" step="10000" value="5000000" required />
+              <input id="salesVolumeAnnualUsd" name="salesVolumeAnnualUsd" type="number" min="0" step="10000"
+                value="5000000" required />
               <p id="salesVolumeAnnualUsdError" class="field-error" aria-live="polite"></p>
             </div>
           </div>
@@ -127,12 +144,24 @@
               <thead>
                 <tr>
                   <th>Scenario</th>
-                  <th>Time saved <button type="button" class="info-dot" data-help="Estimated weekly hours saved per sales rep by using Persana workflows and automation." aria-label="Time saved help">i</button><br/>(hrs/rep/week)</th>
-                  <th>Conversion lift <button type="button" class="info-dot" data-help="Expected percentage increase in conversion from existing sales volume due to better targeting and execution." aria-label="Conversion lift help">i</button><br/>(%)</th>
-                  <th>Tools replaced <button type="button" class="info-dot" data-help="Share of current tooling spend that Persana can replace or consolidate." aria-label="Tools replaced help">i</button><br/>(%)</th>
-                  <th>Persana annual cost <button type="button" class="info-dot" data-help="Annual platform cost used for ROI and payback calculations in this scenario." aria-label="Persana annual cost help">i</button><br/>(USD)</th>
-                  <th>Rep ratio <button type="button" class="info-dot" data-help="Estimated number of sales reps per company employee used to derive rep count from company size." aria-label="Rep ratio help">i</button><br/>(reps per employee)</th>
-                  <th>Rep loaded cost <button type="button" class="info-dot" data-help="Fully loaded annual cost per sales rep, including salary and overhead." aria-label="Rep loaded cost help">i</button><br/>(USD/year)</th>
+                  <th>Time saved <button type="button" class="info-dot"
+                      data-help="Estimated weekly hours saved per sales rep by using Persana workflows and automation."
+                      aria-label="Time saved help">i</button><br />(hrs/rep/week)</th>
+                  <th>Conversion lift <button type="button" class="info-dot"
+                      data-help="Expected percentage increase in conversion from existing sales volume due to better targeting and execution."
+                      aria-label="Conversion lift help">i</button><br />(%)</th>
+                  <th>Tools replaced <button type="button" class="info-dot"
+                      data-help="Share of current tooling spend that Persana can replace or consolidate."
+                      aria-label="Tools replaced help">i</button><br />(%)</th>
+                  <th>Persana annual cost <button type="button" class="info-dot"
+                      data-help="Annual platform cost used for ROI and payback calculations in this scenario."
+                      aria-label="Persana annual cost help">i</button><br />(USD)</th>
+                  <th>Rep ratio <button type="button" class="info-dot"
+                      data-help="Estimated number of sales reps per company employee used to derive rep count from company size."
+                      aria-label="Rep ratio help">i</button><br />(reps per employee)</th>
+                  <th>Rep loaded cost <button type="button" class="info-dot"
+                      data-help="Fully loaded annual cost per sales rep, including salary and overhead."
+                      aria-label="Rep loaded cost help">i</button><br />(USD/year)</th>
                 </tr>
               </thead>
               <tbody>
@@ -172,7 +201,8 @@
 
     <section class="section">
       <div class="scenario-switch" role="tablist" aria-label="Scenario selector">
-        <button type="button" class="scenario-btn is-active" data-scenario="low" role="tab" aria-selected="true">Low</button>
+        <button type="button" class="scenario-btn is-active" data-scenario="low" role="tab"
+          aria-selected="true">Low</button>
         <button type="button" class="scenario-btn" data-scenario="base" role="tab" aria-selected="false">Base</button>
         <button type="button" class="scenario-btn" data-scenario="high" role="tab" aria-selected="false">High</button>
       </div>
@@ -260,4 +290,5 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
   <script src="/lta-roi-demo/app.js" defer></script>
 </body>
+
 </html>

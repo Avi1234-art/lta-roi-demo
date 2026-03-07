@@ -334,10 +334,17 @@ label {
 
 .lookup-meta {
   margin-top: 0.75rem;
-  padding: 0.8rem;
+  padding: 0.8rem 1rem;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(255,253,248,0.95), rgba(245,243,240,0.95));
+  box-shadow: var(--shadow-sm);
+  animation: fadeSlideIn 300ms ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .lookup-meta-head {
@@ -347,10 +354,11 @@ label {
 }
 
 .company-logo-wrap {
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
   border: 1px solid var(--border);
-  border-radius: 50%;
+  border-radius: var(--radius-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -362,7 +370,40 @@ label {
 .company-logo-wrap img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 4px;
+}
+
+.lookup-meta-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.lookup-company-name {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--foreground);
+  line-height: 1.2;
+}
+
+.sources-toggle {
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.4rem;
+}
+
+.sources-toggle > summary {
+  cursor: pointer;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted-foreground);
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .field-error {
@@ -475,33 +516,30 @@ label {
 }
 
 .info-dot::after {
-  content: attr(data-help);
-  position: absolute;
-  bottom: calc(100% + 8px);
-  right: 0;
-  z-index: 10;
-  width: 220px;
-  padding: 0.5rem 0.6rem;
+  display: none;
+}
+
+.info-tooltip {
+  position: fixed;
+  z-index: 9999;
+  max-width: 240px;
+  padding: 0.55rem 0.7rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background: #fffdf8;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
   color: var(--foreground);
   font-family: "Source Sans 3", system-ui, sans-serif;
-  font-size: 0.82rem;
-  line-height: 1.35;
+  font-size: 0.84rem;
+  line-height: 1.4;
   letter-spacing: 0.01em;
-  text-transform: none;
-  text-align: left;
-  opacity: 0;
-  transform: translateY(3px);
   pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
   transition: opacity 150ms ease-out, transform 150ms ease-out;
 }
 
-.info-dot:hover::after,
-.info-dot:focus::after,
-.info-dot:focus-visible::after {
+.info-tooltip.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
