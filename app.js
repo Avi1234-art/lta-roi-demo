@@ -1,5 +1,6 @@
 const SCENARIOS = ["low", "base", "high"];
 const WORKER_LOOKUP_URL = "https://persana-company-lookup.avi-lta-demo.workers.dev/company-lookup";
+const MAX_ESTIMATED_REPS = 600;
 const SCENARIO_LABELS = {
   low: "Low",
   base: "Base",
@@ -18,6 +19,7 @@ const DEFAULT_MOCKS = [
     companyName: "Microsoft",
     employeeEstimate: 221000,
     revenueEstimateUsd: 245000000000,
+    logoUrl: "https://logo.clearbit.com/microsoft.com",
     confidence: 0.88,
     sources: [
       { label: "Wikipedia: Microsoft", url: "https://en.wikipedia.org/wiki/Microsoft", field: "company" },
@@ -29,6 +31,7 @@ const DEFAULT_MOCKS = [
     companyName: "Salesforce",
     employeeEstimate: 72682,
     revenueEstimateUsd: 34860000000,
+    logoUrl: "https://logo.clearbit.com/salesforce.com",
     confidence: 0.84,
     sources: [
       { label: "Wikipedia: Salesforce", url: "https://en.wikipedia.org/wiki/Salesforce", field: "company" },
@@ -40,6 +43,7 @@ const DEFAULT_MOCKS = [
     companyName: "HubSpot",
     employeeEstimate: 8400,
     revenueEstimateUsd: 2200000000,
+    logoUrl: "https://logo.clearbit.com/hubspot.com",
     confidence: 0.79,
     sources: [
       { label: "Wikipedia: HubSpot", url: "https://en.wikipedia.org/wiki/HubSpot", field: "company" }
@@ -50,6 +54,7 @@ const DEFAULT_MOCKS = [
     companyName: "Adobe",
     employeeEstimate: 29800,
     revenueEstimateUsd: 21500000000,
+    logoUrl: "https://logo.clearbit.com/adobe.com",
     confidence: 0.82,
     sources: [
       { label: "Wikipedia: Adobe", url: "https://en.wikipedia.org/wiki/Adobe_Inc.", field: "company" }
@@ -60,9 +65,34 @@ const DEFAULT_MOCKS = [
     companyName: "Oracle",
     employeeEstimate: 159000,
     revenueEstimateUsd: 53000000000,
+    logoUrl: "https://logo.clearbit.com/oracle.com",
     confidence: 0.84,
     sources: [
       { label: "Wikipedia: Oracle", url: "https://en.wikipedia.org/wiki/Oracle_Corporation", field: "company" }
+    ]
+  },
+  {
+    aliases: ["google", "alphabet"],
+    companyName: "Google",
+    employeeEstimate: 182502,
+    revenueEstimateUsd: 307400000000,
+    logoUrl: "https://logo.clearbit.com/google.com",
+    confidence: 0.9,
+    sources: [
+      { label: "Wikipedia: Google", url: "https://en.wikipedia.org/wiki/Google", field: "company" },
+      { label: "Wikipedia: Alphabet Inc.", url: "https://en.wikipedia.org/wiki/Alphabet_Inc.", field: "employeeEstimate,revenueEstimateUsd" }
+    ]
+  },
+  {
+    aliases: ["tesla"],
+    companyName: "Tesla",
+    employeeEstimate: 140473,
+    revenueEstimateUsd: 96773000000,
+    logoUrl: "https://logo.clearbit.com/tesla.com",
+    confidence: 0.9,
+    sources: [
+      { label: "Wikipedia: Tesla", url: "https://en.wikipedia.org/wiki/Tesla,_Inc.", field: "company" },
+      { label: "Wikidata: Tesla", url: "https://www.wikidata.org/wiki/Q478214", field: "employeeEstimate,revenueEstimateUsd" }
     ]
   }
 ];
@@ -71,12 +101,16 @@ const form = document.getElementById("roi-form");
 const scenarioButtons = document.querySelectorAll(".scenario-btn");
 const companySearchRow = document.getElementById("companySearchRow");
 const companyNameInput = document.getElementById("companyName");
+const coreInputsPanel = document.getElementById("coreInputsPanel");
 const autofillButton = document.getElementById("autofillBtn");
 const lookupModeInputs = document.querySelectorAll("input[name='lookupMode']");
 const lookupStatus = document.getElementById("lookupStatus");
 const aiModeNote = document.getElementById("aiModeNote");
+const lookupMeta = document.getElementById("lookupMeta");
 const sourceList = document.getElementById("sourceList");
 const confidenceBadge = document.getElementById("confidenceBadge");
+const companyLogoWrap = document.getElementById("companyLogoWrap");
+const companyLogo = document.getElementById("companyLogo");
 const autoSyncTierCostsCheckbox = document.getElementById("autoSyncTierCosts");
 const AI_PLACEHOLDER_COMPANIES = ["Google", "Tesla", "Microsoft", "Salesforce", "HubSpot"];
 const AI_PLACEHOLDER_PREFIX = "Search for ";
@@ -95,9 +129,10 @@ const outputNodes = {
 
 let activeScenario = "low";
 let lookupMode = "manual";
+let hasAiLookupData = false;
 let placeholderTicker = null;
 let placeholderCompanyIndex = 0;
-let placeholderLetterCount = 0;
+let placeholderSuffixCount = 0;
 let placeholderPhase = "typing";
 let placeholderHoldTicks = 0;
 let chartInstances = {
@@ -201,7 +236,7 @@ function computeScenarioOutput(scenario) {
   const currentToolingAnnualUsd = Math.max(0, getInputValue("currentToolingAnnualUsd"));
   const salesVolumeAnnualUsd = Math.max(0, getInputValue("salesVolumeAnnualUsd"));
 
-  const estimatedReps = Math.max(1, companySizeEmployees * assumptions.repCountRatio);
+  const estimatedReps = clamp(companySizeEmployees * assumptions.repCountRatio, 1, MAX_ESTIMATED_REPS);
   const repHourlyCost = assumptions.repFullyLoadedAnnualUsd / 2000;
   const annualHoursSaved = estimatedReps * assumptions.timeSavedHoursPerRepPerWeek * 52;
 
@@ -437,8 +472,35 @@ function round(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
+function roundToNearest(value, step) {
+  if (!Number.isFinite(value) || step <= 0) {
+    return 0;
+  }
+  return Math.round(value / step) * step;
+}
+
 function normalizeName(input) {
   return input.trim().toLowerCase();
+}
+
+function setCoreInputsVisible(visible) {
+  coreInputsPanel.classList.toggle("is-hidden", !visible);
+}
+
+function estimateToolingSpendFromEmployees(employeeEstimate) {
+  const estimatedReps = clamp(employeeEstimate * 0.002, 6, MAX_ESTIMATED_REPS);
+  const tooling = estimatedReps * 4500;
+  return roundToNearest(clamp(tooling, 30000, 3000000), 1000);
+}
+
+function estimateAddressableSalesVolume(employeeEstimate, revenueEstimateUsd) {
+  if (Number.isFinite(revenueEstimateUsd) && revenueEstimateUsd > 0) {
+    const scaled = revenueEstimateUsd * 0.0002;
+    return roundToNearest(clamp(scaled, 1500000, 40000000), 10000);
+  }
+
+  const fallback = employeeEstimate * 35000;
+  return roundToNearest(clamp(fallback, 1500000, 25000000), 10000);
 }
 
 function findDemoMock(companyName) {
@@ -501,18 +563,39 @@ async function runLookup(companyName) {
 
 function applyLookupResult(data) {
   const companySizeInput = document.getElementById("companySizeEmployees");
+  const toolingInput = document.getElementById("currentToolingAnnualUsd");
   const salesVolumeInput = document.getElementById("salesVolumeAnnualUsd");
+  const employeeEstimate = Number.isFinite(data.employeeEstimate) && data.employeeEstimate > 0
+    ? Math.round(data.employeeEstimate)
+    : null;
 
-  if (Number.isFinite(data.employeeEstimate) && data.employeeEstimate > 0) {
-    companySizeInput.value = String(Math.round(data.employeeEstimate));
+  if (employeeEstimate) {
+    companySizeInput.value = String(employeeEstimate);
   }
 
-  if (Number.isFinite(data.revenueEstimateUsd) && data.revenueEstimateUsd > 0) {
-    salesVolumeInput.value = String(Math.round(data.revenueEstimateUsd));
+  if (employeeEstimate) {
+    toolingInput.value = String(estimateToolingSpendFromEmployees(employeeEstimate));
+    salesVolumeInput.value = String(
+      estimateAddressableSalesVolume(employeeEstimate, Number.isFinite(data.revenueEstimateUsd) ? data.revenueEstimateUsd : 0)
+    );
   }
 
   if (autoSyncTierCostsCheckbox.checked) {
     syncScenarioCostsFromTier();
+  }
+
+  hasAiLookupData = true;
+  setCoreInputsVisible(true);
+  lookupMeta.classList.remove("hidden");
+
+  if (data.logoUrl) {
+    companyLogo.src = data.logoUrl;
+    companyLogo.alt = `${data.companyName || "Company"} logo`;
+    companyLogoWrap.classList.remove("hidden");
+  } else {
+    companyLogo.removeAttribute("src");
+    companyLogo.alt = "";
+    companyLogoWrap.classList.add("hidden");
   }
 
   const confidencePct = Math.max(0, Math.min(100, Math.round((data.confidence || 0) * 100)));
@@ -552,12 +635,12 @@ function tickPlaceholderAnimation() {
     return;
   }
 
-  const company = AI_PLACEHOLDER_COMPANIES[placeholderCompanyIndex];
+  const targetSuffix = `${AI_PLACEHOLDER_COMPANIES[placeholderCompanyIndex]}...`;
 
   if (placeholderPhase === "typing") {
-    placeholderLetterCount += 1;
-    if (placeholderLetterCount >= company.length) {
-      placeholderLetterCount = company.length;
+    placeholderSuffixCount += 1;
+    if (placeholderSuffixCount >= targetSuffix.length) {
+      placeholderSuffixCount = targetSuffix.length;
       placeholderPhase = "hold";
       placeholderHoldTicks = 0;
     }
@@ -567,16 +650,16 @@ function tickPlaceholderAnimation() {
       placeholderPhase = "deleting";
     }
   } else {
-    placeholderLetterCount -= 1;
-    if (placeholderLetterCount <= 0) {
-      placeholderLetterCount = 0;
+    placeholderSuffixCount -= 1;
+    if (placeholderSuffixCount <= 0) {
+      placeholderSuffixCount = 0;
       placeholderPhase = "typing";
       placeholderCompanyIndex = (placeholderCompanyIndex + 1) % AI_PLACEHOLDER_COMPANIES.length;
     }
   }
 
-  const typedCompany = company.slice(0, placeholderLetterCount);
-  companyNameInput.placeholder = `${AI_PLACEHOLDER_PREFIX}${typedCompany}${typedCompany ? "..." : ""}`;
+  const typedSuffix = targetSuffix.slice(0, placeholderSuffixCount);
+  companyNameInput.placeholder = `${AI_PLACEHOLDER_PREFIX}${typedSuffix}`;
 }
 
 function startPlaceholderAnimation() {
@@ -585,7 +668,7 @@ function startPlaceholderAnimation() {
   }
 
   placeholderCompanyIndex = 0;
-  placeholderLetterCount = 0;
+  placeholderSuffixCount = 0;
   placeholderPhase = "typing";
   placeholderHoldTicks = 0;
   placeholderTicker = window.setInterval(tickPlaceholderAnimation, 110);
@@ -609,15 +692,22 @@ function updateLookupModeUI() {
 
   if (aiMode) {
     lookupStatus.textContent = "AI Powered mode is on. Run lookup to pull company size and revenue estimate.";
-    confidenceBadge.textContent = "Confidence: not run";
-    sourceList.innerHTML = "<li>Run AI-powered lookup to attach source references.</li>";
+    if (hasAiLookupData) {
+      lookupMeta.classList.remove("hidden");
+      setCoreInputsVisible(true);
+    } else {
+      confidenceBadge.textContent = "Confidence: not run";
+      sourceList.innerHTML = "<li>Run AI-powered lookup to attach source references.</li>";
+      lookupMeta.classList.add("hidden");
+      setCoreInputsVisible(false);
+    }
     startPlaceholderAnimation();
     return;
   }
 
   lookupStatus.textContent = "Manual mode is on. Enter values directly.";
-  confidenceBadge.textContent = "Confidence: manual mode";
-  sourceList.innerHTML = "<li>Manual mode selected. Data sourcing is disabled.</li>";
+  setCoreInputsVisible(true);
+  lookupMeta.classList.add("hidden");
   companyNameInput.placeholder = "Company name (optional in Manual mode)";
   stopPlaceholderAnimation();
 }

@@ -37,12 +37,12 @@
         <fieldset class="mode-toggle" aria-label="Lookup mode">
           <legend class="sr-only">Lookup mode</legend>
           <label class="mode-option">
-            <input type="radio" name="lookupMode" value="manual" />
-            <span>Manual</span>
-          </label>
-          <label class="mode-option">
             <input type="radio" name="lookupMode" value="ai" checked />
             <span>AI Powered</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="lookupMode" value="manual" />
+            <span>Manual</span>
           </label>
         </fieldset>
 
@@ -59,25 +59,39 @@
               data source endpoint
             </a>.
           </p>
+
+          <section id="lookupMeta" class="lookup-meta hidden" aria-label="Lookup confidence and sources">
+            <div class="lookup-meta-head">
+              <div id="companyLogoWrap" class="company-logo-wrap hidden">
+                <img id="companyLogo" alt="" loading="lazy" />
+              </div>
+              <p id="confidenceBadge" class="confidence-badge">Confidence: not run</p>
+            </div>
+            <ul id="sourceList" class="source-list">
+              <li>Run AI-powered lookup to attach source references.</li>
+            </ul>
+          </section>
         </div>
 
-        <div class="input-grid">
-          <div class="input-group">
-            <label for="companySizeEmployees">Company size (employees)</label>
-            <input id="companySizeEmployees" name="companySizeEmployees" type="number" min="1" step="1" value="250" required />
-            <p id="companySizeEmployeesError" class="field-error" aria-live="polite"></p>
-          </div>
+        <div id="coreInputsPanel" class="reveal-panel is-hidden">
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="companySizeEmployees">Company size (employees)</label>
+              <input id="companySizeEmployees" name="companySizeEmployees" type="number" min="1" step="1" value="250" required />
+              <p id="companySizeEmployeesError" class="field-error" aria-live="polite"></p>
+            </div>
 
-          <div class="input-group">
-            <label for="currentToolingAnnualUsd">Current tooling spend (USD / year)</label>
-            <input id="currentToolingAnnualUsd" name="currentToolingAnnualUsd" type="number" min="0" step="1000" value="90000" required />
-            <p id="currentToolingAnnualUsdError" class="field-error" aria-live="polite"></p>
-          </div>
+            <div class="input-group">
+              <label for="currentToolingAnnualUsd">Current tooling spend (USD / year)</label>
+              <input id="currentToolingAnnualUsd" name="currentToolingAnnualUsd" type="number" min="0" step="1000" value="90000" required />
+              <p id="currentToolingAnnualUsdError" class="field-error" aria-live="polite"></p>
+            </div>
 
-          <div class="input-group">
-            <label for="salesVolumeAnnualUsd">Sales volume (USD / year)</label>
-            <input id="salesVolumeAnnualUsd" name="salesVolumeAnnualUsd" type="number" min="0" step="10000" value="5000000" required />
-            <p id="salesVolumeAnnualUsdError" class="field-error" aria-live="polite"></p>
+            <div class="input-group">
+              <label for="salesVolumeAnnualUsd">Sales volume (USD / year)</label>
+              <input id="salesVolumeAnnualUsd" name="salesVolumeAnnualUsd" type="number" min="0" step="10000" value="5000000" required />
+              <p id="salesVolumeAnnualUsdError" class="field-error" aria-live="polite"></p>
+            </div>
           </div>
         </div>
 
@@ -95,15 +109,15 @@
           <div class="input-grid tiers-grid">
             <div class="input-group">
               <label for="tierSmbCostUsd">SMB (1-200)</label>
-              <input id="tierSmbCostUsd" type="number" min="0" step="1000" value="24000" />
+              <input id="tierSmbCostUsd" type="number" min="0" step="1000" value="36000" />
             </div>
             <div class="input-group">
               <label for="tierMidCostUsd">Mid-market (201-1000)</label>
-              <input id="tierMidCostUsd" type="number" min="0" step="1000" value="60000" />
+              <input id="tierMidCostUsd" type="number" min="0" step="1000" value="120000" />
             </div>
             <div class="input-group">
               <label for="tierEntCostUsd">Enterprise (1001+)</label>
-              <input id="tierEntCostUsd" type="number" min="0" step="1000" value="120000" />
+              <input id="tierEntCostUsd" type="number" min="0" step="1000" value="400000" />
             </div>
           </div>
 
@@ -113,12 +127,12 @@
               <thead>
                 <tr>
                   <th>Scenario</th>
-                  <th>Time saved <span class="info-dot" title="Estimated weekly hours saved per sales rep by using Persana workflows and automation." aria-label="Time saved help">i</span><br/>(hrs/rep/week)</th>
-                  <th>Conversion lift <span class="info-dot" title="Expected percentage increase in conversion from existing sales volume due to better targeting and execution." aria-label="Conversion lift help">i</span><br/>(%)</th>
-                  <th>Tools replaced <span class="info-dot" title="Share of current tooling spend that Persana can replace or consolidate." aria-label="Tools replaced help">i</span><br/>(%)</th>
-                  <th>Persana annual cost <span class="info-dot" title="Annual platform cost used for ROI and payback calculations in this scenario." aria-label="Persana annual cost help">i</span><br/>(USD)</th>
-                  <th>Rep ratio <span class="info-dot" title="Estimated number of sales reps per company employee used to derive rep count from company size." aria-label="Rep ratio help">i</span><br/>(reps per employee)</th>
-                  <th>Rep loaded cost <span class="info-dot" title="Fully loaded annual cost per sales rep, including salary and overhead." aria-label="Rep loaded cost help">i</span><br/>(USD/year)</th>
+                  <th>Time saved <button type="button" class="info-dot" data-help="Estimated weekly hours saved per sales rep by using Persana workflows and automation." aria-label="Time saved help">i</button><br/>(hrs/rep/week)</th>
+                  <th>Conversion lift <button type="button" class="info-dot" data-help="Expected percentage increase in conversion from existing sales volume due to better targeting and execution." aria-label="Conversion lift help">i</button><br/>(%)</th>
+                  <th>Tools replaced <button type="button" class="info-dot" data-help="Share of current tooling spend that Persana can replace or consolidate." aria-label="Tools replaced help">i</button><br/>(%)</th>
+                  <th>Persana annual cost <button type="button" class="info-dot" data-help="Annual platform cost used for ROI and payback calculations in this scenario." aria-label="Persana annual cost help">i</button><br/>(USD)</th>
+                  <th>Rep ratio <button type="button" class="info-dot" data-help="Estimated number of sales reps per company employee used to derive rep count from company size." aria-label="Rep ratio help">i</button><br/>(reps per employee)</th>
+                  <th>Rep loaded cost <button type="button" class="info-dot" data-help="Fully loaded annual cost per sales rep, including salary and overhead." aria-label="Rep loaded cost help">i</button><br/>(USD/year)</th>
                 </tr>
               </thead>
               <tbody>
@@ -127,8 +141,8 @@
                   <td><input id="low-timeSavedHoursPerRepPerWeek" type="number" min="0" step="0.1" value="2" /></td>
                   <td><input id="low-conversionLiftPct" type="number" min="0" step="0.1" value="3" /></td>
                   <td><input id="low-toolsReplacedPct" type="number" min="0" max="100" step="1" value="30" /></td>
-                  <td><input id="low-persanaAnnualCostUsd" type="number" min="0" step="1000" value="24000" /></td>
-                  <td><input id="low-repCountRatio" type="number" min="0" step="0.001" value="0.07" /></td>
+                  <td><input id="low-persanaAnnualCostUsd" type="number" min="0" step="1000" value="36000" /></td>
+                  <td><input id="low-repCountRatio" type="number" min="0" step="0.001" value="0.001" /></td>
                   <td><input id="low-repFullyLoadedAnnualUsd" type="number" min="0" step="1000" value="130000" /></td>
                 </tr>
                 <tr>
@@ -136,8 +150,8 @@
                   <td><input id="base-timeSavedHoursPerRepPerWeek" type="number" min="0" step="0.1" value="4" /></td>
                   <td><input id="base-conversionLiftPct" type="number" min="0" step="0.1" value="7" /></td>
                   <td><input id="base-toolsReplacedPct" type="number" min="0" max="100" step="1" value="50" /></td>
-                  <td><input id="base-persanaAnnualCostUsd" type="number" min="0" step="1000" value="60000" /></td>
-                  <td><input id="base-repCountRatio" type="number" min="0" step="0.001" value="0.09" /></td>
+                  <td><input id="base-persanaAnnualCostUsd" type="number" min="0" step="1000" value="120000" /></td>
+                  <td><input id="base-repCountRatio" type="number" min="0" step="0.001" value="0.002" /></td>
                   <td><input id="base-repFullyLoadedAnnualUsd" type="number" min="0" step="1000" value="150000" /></td>
                 </tr>
                 <tr>
@@ -145,8 +159,8 @@
                   <td><input id="high-timeSavedHoursPerRepPerWeek" type="number" min="0" step="0.1" value="6" /></td>
                   <td><input id="high-conversionLiftPct" type="number" min="0" step="0.1" value="12" /></td>
                   <td><input id="high-toolsReplacedPct" type="number" min="0" max="100" step="1" value="70" /></td>
-                  <td><input id="high-persanaAnnualCostUsd" type="number" min="0" step="1000" value="120000" /></td>
-                  <td><input id="high-repCountRatio" type="number" min="0" step="0.001" value="0.11" /></td>
+                  <td><input id="high-persanaAnnualCostUsd" type="number" min="0" step="1000" value="400000" /></td>
+                  <td><input id="high-repCountRatio" type="number" min="0" step="0.001" value="0.003" /></td>
                   <td><input id="high-repFullyLoadedAnnualUsd" type="number" min="0" step="1000" value="170000" /></td>
                 </tr>
               </tbody>
@@ -241,21 +255,6 @@
       </div>
     </section>
 
-    <section class="card section" aria-labelledby="source-heading">
-      <div class="section-label" aria-hidden="true">
-        <span class="rule"></span>
-        <span class="label">Data Confidence</span>
-        <span class="rule"></span>
-      </div>
-      <h2 id="source-heading">Lookup sources</h2>
-      <p class="field-note">
-        Public-company auto-fill is directional. Always validate assumptions before sharing externally.
-      </p>
-      <p id="confidenceBadge" class="confidence-badge">Confidence: not run</p>
-      <ul id="sourceList" class="source-list">
-        <li>Run company auto-fill to attach source references.</li>
-      </ul>
-    </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>

@@ -4,6 +4,7 @@ const DEMO_MOCKS = [
     companyName: "Microsoft",
     employeeEstimate: 221000,
     revenueEstimateUsd: 245000000000,
+    logoUrl: "https://logo.clearbit.com/microsoft.com",
     confidence: 0.88,
     sources: [
       { label: "Wikipedia: Microsoft", url: "https://en.wikipedia.org/wiki/Microsoft", field: "company" },
@@ -15,6 +16,7 @@ const DEMO_MOCKS = [
     companyName: "Salesforce",
     employeeEstimate: 72682,
     revenueEstimateUsd: 34860000000,
+    logoUrl: "https://logo.clearbit.com/salesforce.com",
     confidence: 0.84,
     sources: [
       { label: "Wikipedia: Salesforce", url: "https://en.wikipedia.org/wiki/Salesforce", field: "company" },
@@ -26,6 +28,7 @@ const DEMO_MOCKS = [
     companyName: "HubSpot",
     employeeEstimate: 8400,
     revenueEstimateUsd: 2200000000,
+    logoUrl: "https://logo.clearbit.com/hubspot.com",
     confidence: 0.79,
     sources: [
       { label: "Wikipedia: HubSpot", url: "https://en.wikipedia.org/wiki/HubSpot", field: "company" }
@@ -36,6 +39,7 @@ const DEMO_MOCKS = [
     companyName: "Adobe",
     employeeEstimate: 29800,
     revenueEstimateUsd: 21500000000,
+    logoUrl: "https://logo.clearbit.com/adobe.com",
     confidence: 0.82,
     sources: [
       { label: "Wikipedia: Adobe", url: "https://en.wikipedia.org/wiki/Adobe_Inc.", field: "company" }
@@ -46,6 +50,7 @@ const DEMO_MOCKS = [
     companyName: "Oracle",
     employeeEstimate: 159000,
     revenueEstimateUsd: 53000000000,
+    logoUrl: "https://logo.clearbit.com/oracle.com",
     confidence: 0.84,
     sources: [
       { label: "Wikipedia: Oracle", url: "https://en.wikipedia.org/wiki/Oracle_Corporation", field: "company" }
@@ -56,6 +61,7 @@ const DEMO_MOCKS = [
     companyName: "Google",
     employeeEstimate: 182502,
     revenueEstimateUsd: 307400000000,
+    logoUrl: "https://logo.clearbit.com/google.com",
     confidence: 0.9,
     sources: [
       { label: "Wikipedia: Google", url: "https://en.wikipedia.org/wiki/Google", field: "company" },
@@ -67,6 +73,7 @@ const DEMO_MOCKS = [
     companyName: "Tesla",
     employeeEstimate: 140473,
     revenueEstimateUsd: 96773000000,
+    logoUrl: "https://logo.clearbit.com/tesla.com",
     confidence: 0.9,
     sources: [
       { label: "Wikipedia: Tesla", url: "https://en.wikipedia.org/wiki/Tesla,_Inc.", field: "company" },
@@ -234,7 +241,7 @@ async function fetchEntity(wikidataId) {
   return entityPayload?.entities?.[wikidataId] || null;
 }
 
-async function buildLiveResultFromEntity(entity, wikidataId, companyName, summaryUrl) {
+async function buildLiveResultFromEntity(entity, wikidataId, companyName, summaryUrl, summaryLogoUrl) {
   if (!entity) {
     return null;
   }
@@ -280,6 +287,7 @@ async function buildLiveResultFromEntity(entity, wikidataId, companyName, summar
     employeeEstimate: employeeEstimate || null,
     employeeRangeLabel: employeeRangeLabel(employeeEstimate || 0),
     revenueEstimateUsd: revenueEstimateUsd || null,
+    logoUrl: summaryLogoUrl || null,
     confidence: Math.min(0.95, confidence),
     sources: [
       {
@@ -328,7 +336,8 @@ async function fetchLiveWikidata(companyName) {
           entity,
           wikidataId,
           summary?.title || companyName,
-          summary?.content_urls?.desktop?.page || null
+          summary?.content_urls?.desktop?.page || null,
+          summary?.thumbnail?.source || null
         );
 
         if (result) {
@@ -346,7 +355,7 @@ async function fetchLiveWikidata(companyName) {
     }
 
     const entity = await fetchEntity(candidateId);
-    const result = await buildLiveResultFromEntity(entity, candidateId, candidate?.label || companyName, null);
+    const result = await buildLiveResultFromEntity(entity, candidateId, candidate?.label || companyName, null, null);
     if (result) {
       return result;
     }
@@ -397,8 +406,13 @@ export default {
     if (directMock) {
       return jsonResponse(
         {
-          ...directMock,
+          companyName: directMock.companyName,
+          employeeEstimate: directMock.employeeEstimate,
           employeeRangeLabel: employeeRangeLabel(directMock.employeeEstimate),
+          revenueEstimateUsd: directMock.revenueEstimateUsd,
+          logoUrl: directMock.logoUrl || null,
+          confidence: directMock.confidence,
+          sources: directMock.sources,
           usedMock: false
         },
         200,
