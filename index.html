@@ -101,7 +101,10 @@
         </div>
     </section>
 
-    <!-- Smooth fade overlay for page transitions -->
+    <!-- Transition overlay: shimmer loading text + dark fade -->
+    <div class="lp-transition" id="pageTransition">
+        <p class="lp-shimmer-text">Calculating possibilities...</p>
+    </div>
     <div class="lp-exit-overlay" id="exitOverlay"></div>
 
     <!-- Demo company picker -->
@@ -360,12 +363,28 @@
     <script>
         (function () {
             var overlay = document.getElementById("exitOverlay");
+            var transition = document.getElementById("pageTransition");
             var picker = document.getElementById("demoPicker");
 
-            /* Smooth CSS fade then navigate */
+            /* Zoom-into-shader transition then navigate */
             function smoothNavigate(dest) {
-                if (overlay) overlay.classList.add("is-active");
-                setTimeout(function () { window.location.href = dest; }, 350);
+                /* Phase 1: fade out text, start canvas zoom */
+                document.body.classList.add("is-transitioning");
+
+                /* Phase 2: show shimmer loading text */
+                setTimeout(function () {
+                    if (transition) transition.classList.add("is-active");
+                }, 350);
+
+                /* Phase 3: fade to dark */
+                setTimeout(function () {
+                    if (overlay) overlay.classList.add("is-active");
+                }, 1500);
+
+                /* Phase 4: navigate */
+                setTimeout(function () {
+                    window.location.href = dest;
+                }, 2000);
             }
 
             /* Calculator button */
