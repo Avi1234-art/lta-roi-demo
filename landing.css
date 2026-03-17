@@ -314,8 +314,8 @@ body.is-transitioning .lp-below {
 }
 
 body.is-transitioning #shaderCanvas {
-    transform: scale(3.5);
-    transition: transform 2s cubic-bezier(0.25, 0.1, 0.25, 1);
+    transform: scale(4);
+    transition: transform 3.2s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 /* Transition overlay with shimmer loading text */
