@@ -336,23 +336,24 @@ body.is-transitioning #shaderCanvas {
 }
 
 .lp-shimmer-text {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.15em;
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     background: linear-gradient(
         90deg,
-        var(--lp-dim) 0%,
-        var(--lp-dim) 40%,
-        var(--lp-gold) 50%,
-        var(--lp-dim) 60%,
-        var(--lp-dim) 100%
+        var(--lp-muted) 0%,
+        var(--lp-muted) 40%,
+        #fff 50%,
+        var(--lp-muted) 60%,
+        var(--lp-muted) 100%
     );
     background-size: 250% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-shadow: none;
     animation: shimmer 1.5s linear infinite;
 }
 
