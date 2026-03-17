@@ -1,6 +1,6 @@
 /* ———————————————————————————————————————————————————
    Persana AI – Landing Page
-   Dark luxury design system
+   Dark luxury design system + WebGL shader hero
    ——————————————————————————————————————————————————— */
 
 :root {
@@ -10,6 +10,7 @@
     --lp-muted: #b6a596;
     --lp-dim: #66473b;
     --lp-accent: #dc9f85;
+    --lp-gold: #f0c97f;
     --lp-dark-line: #35211a;
     --lp-radius: 4px;
 }
@@ -34,6 +35,17 @@ body {
     overflow-x: hidden;
 }
 
+/* ——— WebGL shader canvas ——— */
+#shaderCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    touch-action: none;
+    background: black;
+}
+
 /* ——— Grain overlay ——— */
 .lp-grain {
     position: fixed;
@@ -48,7 +60,7 @@ body {
 
 /* ——— Navigation ——— */
 .lp-nav {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -78,7 +90,7 @@ body {
 .lp-nav-line {
     flex: 1;
     height: 1px;
-    background: var(--lp-dark-line);
+    background: rgba(53, 33, 26, 0.6);
 }
 
 .lp-nav-status {
@@ -91,7 +103,357 @@ body {
     white-space: nowrap;
 }
 
-/* ——— Exit transition overlay (smooth dark fade) ——— */
+/* ——— Hero (full viewport) ——— */
+.lp-hero {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    min-height: 600px;
+    padding: 6rem 2.5rem 4rem;
+    text-align: center;
+}
+
+/* Fade-to-dark at bottom of hero */
+.lp-hero::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 160px;
+    background: linear-gradient(to bottom, transparent, var(--lp-bg));
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ——— Trust badge ——— */
+.lp-trust-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 1.2rem;
+    margin-bottom: 2.2rem;
+    background: rgba(220, 159, 133, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(220, 159, 133, 0.2);
+    border-radius: 100px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--lp-muted);
+}
+
+.lp-trust-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--lp-accent);
+    box-shadow: 0 0 8px rgba(220, 159, 133, 0.5);
+    animation: pulse 2.4s ease-in-out infinite;
+}
+
+/* ——— Headline with gradient ——— */
+.lp-headline-wrap {
+    position: relative;
+    line-height: 0.92;
+}
+
+.lp-headline {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: clamp(4.5rem, 12vw, 12rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--lp-accent) 0%, var(--lp-gold) 45%, var(--lp-accent) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 6s ease infinite;
+}
+
+/* ——— Hero subtitle ——— */
+.lp-hero-sub {
+    margin-top: 1.2rem;
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    font-size: 1.15rem;
+    font-weight: 300;
+    color: var(--lp-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* ——— Hero CTA buttons ——— */
+.lp-hero-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+}
+
+.lp-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.9rem 2rem;
+    background: linear-gradient(135deg, var(--lp-accent), #e5ad94);
+    color: var(--lp-bg);
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: transform 250ms ease-out, box-shadow 250ms ease-out, background 250ms ease-out;
+}
+
+.lp-cta-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(220, 159, 133, 0.3);
+}
+
+.lp-cta-btn:active {
+    transform: translateY(0) scale(1);
+}
+
+.lp-cta-arrow {
+    font-size: 1.1rem;
+    transition: transform 200ms ease-out;
+}
+
+.lp-cta-btn:hover .lp-cta-arrow {
+    transform: translateX(3px);
+}
+
+.lp-demo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.6rem;
+    background: rgba(220, 159, 133, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--lp-muted);
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 500;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    border: 1px solid rgba(220, 159, 133, 0.2);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: color 250ms ease-out, border-color 250ms ease-out, transform 250ms ease-out, box-shadow 250ms ease-out;
+}
+
+.lp-demo-btn:hover {
+    color: var(--lp-text);
+    border-color: var(--lp-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(220, 159, 133, 0.15);
+}
+
+.lp-demo-btn:active {
+    transform: translateY(0);
+}
+
+/* ——— Scroll indicator ——— */
+.lp-scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--lp-dim);
+}
+
+.lp-scroll-text {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.6rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+}
+
+.lp-scroll-arrow {
+    animation: bounceDown 2s ease-in-out infinite;
+}
+
+/* ——— Below-fold section ——— */
+.lp-below {
+    position: relative;
+    z-index: 2;
+    background: var(--lp-bg);
+}
+
+.lp-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--lp-dark-line);
+}
+
+.lp-bottom {
+    padding: 5rem 2.5rem 6rem;
+}
+
+.lp-bottom-grid {
+    max-width: 72rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 5fr 1fr 6fr;
+    gap: 0;
+    align-items: start;
+}
+
+/* Value column (left) */
+.lp-value-col {
+    grid-column: 1 / 2;
+}
+
+.lp-value-text {
+    font-size: 1.18rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--lp-text);
+    max-width: 38ch;
+}
+
+.lp-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 1.6rem;
+}
+
+.lp-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--lp-accent);
+    box-shadow: 0 0 6px rgba(220, 159, 133, 0.4);
+    animation: pulse 2.4s ease-in-out infinite;
+}
+
+.lp-status-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--lp-muted);
+}
+
+/* CTA column (right) */
+.lp-cta-col {
+    grid-column: 3 / 4;
+}
+
+.lp-cta-heading {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 1.55rem;
+    font-weight: 500;
+    color: var(--lp-text);
+    line-height: 1.3;
+    margin-bottom: 0.9rem;
+}
+
+.lp-cta-desc {
+    font-size: 0.98rem;
+    font-weight: 400;
+    color: var(--lp-muted);
+    line-height: 1.65;
+    max-width: 42ch;
+    margin-bottom: 1.2rem;
+}
+
+.lp-cta-caption {
+    font-size: 0.78rem;
+    color: var(--lp-dim);
+    letter-spacing: 0.04em;
+}
+
+/* ——— Scroll reveal ——— */
+.lp-reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.9s ease-out, transform 0.9s ease-out;
+}
+
+.lp-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ——— Entrance animations ——— */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.anim-fade-down {
+    animation: fadeInDown 0.8s ease-out forwards;
+}
+
+.anim-fade-up {
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.anim-delay-1 { animation-delay: 0.15s; }
+.anim-delay-2 { animation-delay: 0.35s; }
+.anim-delay-3 { animation-delay: 0.55s; }
+.anim-delay-4 { animation-delay: 0.85s; }
+
+/* ——— Keyframes ——— */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes bounceDown {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(6px); }
+    60% { transform: translateY(3px); }
+}
+
+/* ——— Exit transition overlay ——— */
 .lp-exit-overlay {
     position: fixed;
     inset: 0;
@@ -168,9 +530,9 @@ body {
 }
 
 .lp-demo-picker-card:hover {
-    border-color: #4A9EFF;
+    border-color: var(--lp-accent);
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(74, 158, 255, 0.18);
+    box-shadow: 0 8px 24px rgba(220, 159, 133, 0.18);
 }
 
 .lp-demo-picker-logo {
@@ -206,269 +568,6 @@ body {
     border-color: var(--lp-muted);
 }
 
-/* ——— Hero ——— */
-.lp-hero {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 78vh;
-    padding: 8rem 2.5rem 3rem;
-    text-align: center;
-    overflow: hidden;
-}
-
-.lp-hero-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.65rem;
-    margin-bottom: 2rem;
-    animation: fadeUp 700ms ease-out both;
-}
-
-.lp-label-line {
-    width: 24px;
-    height: 1px;
-    background: var(--lp-accent);
-}
-
-.lp-label-text {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 0.72rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: var(--lp-muted);
-}
-
-/* Headline with ghost-outline depth */
-.lp-headline-wrap {
-    position: relative;
-    line-height: 0.92;
-    animation: fadeUp 700ms 120ms ease-out both;
-}
-
-.lp-headline {
-    font-family: "Playfair Display", Georgia, serif;
-    font-size: clamp(4rem, 11.5vw, 11rem);
-    font-weight: 700;
-    color: var(--lp-text);
-    letter-spacing: -0.02em;
-    position: relative;
-    z-index: 2;
-}
-
-.lp-headline-ghost {
-    position: absolute;
-    inset: 0;
-    font-family: "Playfair Display", Georgia, serif;
-    font-size: clamp(4rem, 11.5vw, 11rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: transparent;
-    -webkit-text-stroke: 1px var(--lp-dim);
-    transform: translate(4px, 4px);
-    z-index: 1;
-    user-select: none;
-}
-
-.lp-hero-sub {
-    margin-top: 1.6rem;
-    font-family: "Source Sans 3", system-ui, sans-serif;
-    font-size: 1.15rem;
-    font-weight: 300;
-    color: var(--lp-muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    animation: fadeUp 700ms 240ms ease-out both;
-}
-
-/* ——— Divider ——— */
-.lp-divider {
-    width: 100%;
-    height: 1px;
-    background: var(--lp-dark-line);
-}
-
-/* ——— Bottom section ——— */
-.lp-bottom {
-    padding: 4rem 2.5rem 5rem;
-}
-
-.lp-bottom-grid {
-    max-width: 72rem;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 5fr 1fr 6fr;
-    gap: 0;
-    align-items: start;
-}
-
-/* Value column (left) */
-.lp-value-col {
-    grid-column: 1 / 2;
-    animation: fadeUp 700ms 400ms ease-out both;
-}
-
-.lp-value-text {
-    font-size: 1.18rem;
-    font-weight: 300;
-    line-height: 1.7;
-    color: var(--lp-text);
-    max-width: 38ch;
-}
-
-.lp-status-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    margin-top: 1.6rem;
-}
-
-.lp-status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--lp-accent);
-    box-shadow: 0 0 6px rgba(220, 159, 133, 0.4);
-    animation: pulse 2.4s ease-in-out infinite;
-}
-
-.lp-status-label {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 0.72rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--lp-muted);
-}
-
-/* CTA column (right) */
-.lp-cta-col {
-    grid-column: 3 / 4;
-    animation: fadeUp 700ms 520ms ease-out both;
-}
-
-.lp-cta-heading {
-    font-family: "Playfair Display", Georgia, serif;
-    font-size: 1.55rem;
-    font-weight: 500;
-    color: var(--lp-text);
-    line-height: 1.3;
-    margin-bottom: 0.9rem;
-}
-
-.lp-cta-desc {
-    font-size: 0.98rem;
-    font-weight: 400;
-    color: var(--lp-muted);
-    line-height: 1.65;
-    max-width: 42ch;
-    margin-bottom: 1.6rem;
-}
-
-.lp-cta-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.85rem 1.5rem;
-    background: var(--lp-accent);
-    color: var(--lp-bg);
-    font-weight: 700;
-    font-size: 0.88rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    text-decoration: none;
-    border: none;
-    border-radius: var(--lp-radius);
-    cursor: pointer;
-    transition: background 200ms ease-out, transform 200ms ease-out, box-shadow 200ms ease-out;
-}
-
-.lp-cta-btn:hover {
-    background: #e5ad94;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(220, 159, 133, 0.2);
-}
-
-.lp-cta-btn:active {
-    transform: translateY(0);
-}
-
-.lp-cta-arrow {
-    font-size: 1.1rem;
-    transition: transform 200ms ease-out;
-}
-
-.lp-cta-btn:hover .lp-cta-arrow {
-    transform: translateX(3px);
-}
-
-.lp-demo-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-top: 0.7rem;
-    padding: 0.75rem 1.5rem;
-    background: transparent;
-    color: var(--lp-muted);
-    font-family: "IBM Plex Mono", monospace;
-    font-weight: 500;
-    font-size: 0.76rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    text-decoration: none;
-    border: 1px solid var(--lp-dark-line);
-    border-radius: var(--lp-radius);
-    cursor: pointer;
-    transition: color 200ms ease-out, border-color 200ms ease-out, transform 200ms ease-out, box-shadow 200ms ease-out;
-}
-
-.lp-demo-btn:hover {
-    color: var(--lp-text);
-    border-color: var(--lp-accent);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(220, 159, 133, 0.12);
-}
-
-.lp-demo-btn:active {
-    transform: translateY(0);
-}
-
-.lp-cta-caption {
-    margin-top: 0.9rem;
-    font-size: 0.78rem;
-    color: var(--lp-dim);
-    letter-spacing: 0.04em;
-}
-
-/* ——— Animations ——— */
-@keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(18px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.5;
-    }
-}
-
 /* ——— Responsive ——— */
 @media (max-width: 900px) {
     .lp-nav {
@@ -476,17 +575,15 @@ body {
     }
 
     .lp-hero {
-        min-height: 60vh;
-        padding: 7rem 1.5rem 2.5rem;
+        padding: 5rem 1.5rem 3rem;
     }
 
-    .lp-headline,
-    .lp-headline-ghost {
-        font-size: clamp(3rem, 14vw, 6rem);
+    .lp-headline {
+        font-size: clamp(3.5rem, 15vw, 7rem);
     }
 
     .lp-bottom {
-        padding: 2.5rem 1.5rem 3.5rem;
+        padding: 3rem 1.5rem 4rem;
     }
 
     .lp-bottom-grid {
@@ -512,10 +609,8 @@ body {
 }
 
 @media (max-width: 480px) {
-
-    .lp-headline,
-    .lp-headline-ghost {
-        font-size: clamp(2.5rem, 16vw, 5rem);
+    .lp-headline {
+        font-size: clamp(3rem, 18vw, 5.5rem);
         letter-spacing: -0.03em;
     }
 
@@ -523,19 +618,37 @@ body {
         font-size: 0.95rem;
     }
 
+    .lp-hero-actions {
+        width: 100%;
+        padding: 0 1rem;
+    }
+
     .lp-cta-btn,
     .lp-demo-btn {
         width: 100%;
         justify-content: center;
     }
+
+    .lp-scroll-hint {
+        bottom: 1.5rem;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-
     *,
     *::before,
     *::after {
         animation: none !important;
         transition: none !important;
+    }
+
+    .anim-fade-up,
+    .anim-fade-down {
+        opacity: 1;
+    }
+
+    .lp-reveal {
+        opacity: 1;
+        transform: none;
     }
 }

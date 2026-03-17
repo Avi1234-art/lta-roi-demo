@@ -17,8 +17,11 @@
 
 <body>
 
-    <!-- Ambient floating particles -->
-    <canvas id="ambientCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
+    <!-- WebGL shader background (fixed behind everything) -->
+    <canvas id="shaderCanvas"></canvas>
+
+    <!-- Ambient grain overlay -->
+    <div class="lp-grain" aria-hidden="true"></div>
 
     <!-- Minimal nav -->
     <nav class="lp-nav" aria-label="Primary">
@@ -27,64 +30,76 @@
         <span class="lp-nav-status">ROI Preview</span>
     </nav>
 
-    <!-- Hero -->
+    <!-- Hero (full viewport) -->
     <header class="lp-hero">
-        <div class="lp-hero-label">
-            <span class="lp-label-line" aria-hidden="true"></span>
-            <span class="lp-label-text">Sales Intelligence</span>
+        <!-- Trust badge -->
+        <div class="lp-trust-badge anim-fade-down">
+            <span class="lp-trust-dot" aria-hidden="true"></span>
+            <span>AI-Powered Sales Intelligence</span>
         </div>
 
-        <div class="lp-headline-wrap" aria-label="Persana AI">
-            <span class="lp-headline-ghost" aria-hidden="true">PERSANA</span>
+        <!-- Headline -->
+        <div class="lp-headline-wrap anim-fade-up anim-delay-1">
             <h1 class="lp-headline">PERSANA</h1>
         </div>
 
-        <p class="lp-hero-sub">AI-Powered Sales Enablement</p>
+        <!-- Subtitle -->
+        <p class="lp-hero-sub anim-fade-up anim-delay-2">AI-Powered Sales Enablement</p>
+
+        <!-- CTA buttons -->
+        <div class="lp-hero-actions anim-fade-up anim-delay-3">
+            <a href="/lta-roi-demo/calculator.html" class="lp-cta-btn" id="launchCalcBtn">
+                Launch ROI Calculator
+                <span class="lp-cta-arrow" aria-hidden="true">&rarr;</span>
+            </a>
+            <a href="/lta-roi-demo/calculator.html?demo=1" class="lp-demo-btn" id="runDemoBtn">
+                &#9654; Run Interactive Demo
+            </a>
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="lp-scroll-hint anim-fade-up anim-delay-4" aria-hidden="true">
+            <span class="lp-scroll-text">Scroll</span>
+            <svg class="lp-scroll-arrow" width="16" height="24" viewBox="0 0 16 24" fill="none">
+                <path d="M8 4L8 20M8 20L2 14M8 20L14 14" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
     </header>
 
-    <!-- Bottom grid -->
-    <div class="lp-divider" aria-hidden="true"></div>
+    <!-- Below-fold content -->
+    <section class="lp-below">
+        <div class="lp-divider" aria-hidden="true"></div>
 
-    <section class="lp-bottom">
-        <div class="lp-bottom-grid">
+        <div class="lp-bottom">
+            <div class="lp-bottom-grid lp-reveal">
+                <!-- Left: Value statement -->
+                <div class="lp-value-col">
+                    <p class="lp-value-text">
+                        Discover the precise revenue impact Persana AI delivers for your sales
+                        team. Walk through Low, Base &amp; High scenarios calibrated to your
+                        company's real data &mdash; employee count, tooling spend, and pipeline
+                        volume &mdash; to quantify time savings, tool consolidation, and conversion
+                        lift in one view.
+                    </p>
+                    <div class="lp-status-indicator">
+                        <span class="lp-status-dot" aria-hidden="true"></span>
+                        <span class="lp-status-label">Live Calculator Available</span>
+                    </div>
+                </div>
 
-            <!-- Left: Value statement -->
-            <div class="lp-value-col">
-                <p class="lp-value-text">
-                    Discover the precise revenue impact Persana AI delivers for your sales
-                    team. Walk through Low, Base & High scenarios calibrated to your
-                    company's real data — employee count, tooling spend, and pipeline
-                    volume — to quantify time savings, tool consolidation, and conversion
-                    lift in one view.
-                </p>
-                <div class="lp-status-indicator">
-                    <span class="lp-status-dot" aria-hidden="true"></span>
-                    <span class="lp-status-label">Live Calculator Available</span>
+                <!-- Right: CTA block -->
+                <div class="lp-cta-col">
+                    <h2 class="lp-cta-heading">See how Persana AI can impact your pipeline</h2>
+                    <p class="lp-cta-desc">
+                        Enter your prospect company, auto-fill public context, and instantly
+                        see ROI across three scenarios &mdash; built for live sales conversations.
+                    </p>
+                    <p class="lp-cta-caption">No signup required. Instant results.</p>
                 </div>
             </div>
-
-            <!-- Right: CTA block -->
-            <div class="lp-cta-col">
-                <h2 class="lp-cta-heading">See how Persana AI can impact your pipeline</h2>
-                <p class="lp-cta-desc">
-                    Enter your prospect company, auto-fill public context, and instantly
-                    see ROI across three scenarios — built for live sales conversations.
-                </p>
-                <a href="/lta-roi-demo/calculator.html" class="lp-cta-btn" id="launchCalcBtn">
-                    Launch ROI Calculator
-                    <span class="lp-cta-arrow" aria-hidden="true">→</span>
-                </a>
-                <a href="/lta-roi-demo/calculator.html?demo=1" class="lp-demo-btn" id="runDemoBtn">
-                    ▶ Run Interactive Demo
-                </a>
-                <p class="lp-cta-caption">No signup required. Instant results.</p>
-            </div>
-
         </div>
     </section>
-
-    <!-- Ambient grain overlay -->
-    <div class="lp-grain" aria-hidden="true"></div>
 
     <!-- Smooth fade overlay for page transitions -->
     <div class="lp-exit-overlay" id="exitOverlay"></div>
@@ -130,6 +145,218 @@
         </div>
     </div>
 
+    <!-- ——— WebGL Shader Engine ——— -->
+    <script>
+        (function () {
+            "use strict";
+
+            /* ——— Fragment shader (by Matthias Hurrle @atzedent) ——— */
+            var SHADER_SRC = [
+                "#version 300 es",
+                "precision highp float;",
+                "out vec4 O;",
+                "uniform vec2 resolution;",
+                "uniform float time;",
+                "#define FC gl_FragCoord.xy",
+                "#define T time",
+                "#define R resolution",
+                "#define MN min(R.x,R.y)",
+                "float rnd(vec2 p){p=fract(p*vec2(12.9898,78.233));p+=dot(p,p+34.56);return fract(p.x*p.y);}",
+                "float noise(in vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);float a=rnd(i),b=rnd(i+vec2(1,0)),c=rnd(i+vec2(0,1)),d=rnd(i+1.);return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}",
+                "float fbm(vec2 p){float t=.0,a=1.;mat2 m=mat2(1.,-.5,.2,1.2);for(int i=0;i<5;i++){t+=a*noise(p);p*=2.*m;a*=.5;}return t;}",
+                "float clouds(vec2 p){float d=1.,t=.0;for(float i=.0;i<3.;i++){float a=d*fbm(i*10.+p.x*.2+.2*(1.+i)*p.y+d+i*i+p);t=mix(t,d,a);d=a;p*=2./(i+1.);}return t;}",
+                "void main(void){",
+                "  vec2 uv=(FC-.5*R)/MN,st=uv*vec2(2,1);",
+                "  vec3 col=vec3(0);",
+                "  float bg=clouds(vec2(st.x+T*.5,-st.y));",
+                "  uv*=1.-.3*(sin(T*.2)*.5+.5);",
+                "  for(float i=1.;i<12.;i++){",
+                "    uv+=.1*cos(i*vec2(.1+.01*i,.8)+i*i+T*.5+.1*uv.x);",
+                "    vec2 p=uv;",
+                "    float d=length(p);",
+                "    col+=.00125/d*(cos(sin(i)*vec3(1,2,3))+1.);",
+                "    float b=noise(i+p+bg*1.731);",
+                "    col+=.002*b/length(max(p,vec2(b*p.x*.02,p.y)));",
+                "    col=mix(col,vec3(bg*.25,bg*.137,bg*.05),d);",
+                "  }",
+                "  O=vec4(col,1);",
+                "}"
+            ].join("\n");
+
+            var VERTEX_SRC = "#version 300 es\nprecision highp float;\nin vec4 position;\nvoid main(){gl_Position=position;}";
+            var VERTICES = [-1, 1, -1, -1, 1, 1, 1, -1];
+
+            /* ——— WebGL Renderer ——— */
+            function Renderer(canvas, scale) {
+                this.canvas = canvas;
+                this.scale = scale;
+                this.gl = canvas.getContext("webgl2");
+                if (!this.gl) return;
+                this.gl.viewport(0, 0, canvas.width * scale, canvas.height * scale);
+                this.program = null;
+                this.vs = null;
+                this.fs = null;
+                this.buffer = null;
+                this.mouseMove = [0, 0];
+                this.mouseCoords = [0, 0];
+                this.pointerCoords = [0, 0];
+                this.nbrOfPointers = 0;
+            }
+
+            Renderer.prototype.compile = function (shader, source) {
+                var gl = this.gl;
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error("Shader compile error:", gl.getShaderInfoLog(shader));
+                }
+            };
+
+            Renderer.prototype.reset = function () {
+                var gl = this.gl;
+                if (this.program && !gl.getProgramParameter(this.program, gl.DELETE_STATUS)) {
+                    if (this.vs) { gl.detachShader(this.program, this.vs); gl.deleteShader(this.vs); }
+                    if (this.fs) { gl.detachShader(this.program, this.fs); gl.deleteShader(this.fs); }
+                    gl.deleteProgram(this.program);
+                }
+            };
+
+            Renderer.prototype.setup = function () {
+                var gl = this.gl;
+                this.vs = gl.createShader(gl.VERTEX_SHADER);
+                this.fs = gl.createShader(gl.FRAGMENT_SHADER);
+                this.compile(this.vs, VERTEX_SRC);
+                this.compile(this.fs, SHADER_SRC);
+                this.program = gl.createProgram();
+                gl.attachShader(this.program, this.vs);
+                gl.attachShader(this.program, this.fs);
+                gl.linkProgram(this.program);
+                if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
+                    console.error(gl.getProgramInfoLog(this.program));
+                }
+            };
+
+            Renderer.prototype.init = function () {
+                var gl = this.gl;
+                var p = this.program;
+                this.buffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(VERTICES), gl.STATIC_DRAW);
+                var pos = gl.getAttribLocation(p, "position");
+                gl.enableVertexAttribArray(pos);
+                gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+                p._resolution = gl.getUniformLocation(p, "resolution");
+                p._time = gl.getUniformLocation(p, "time");
+                p._move = gl.getUniformLocation(p, "move");
+                p._touch = gl.getUniformLocation(p, "touch");
+                p._pointerCount = gl.getUniformLocation(p, "pointerCount");
+                p._pointers = gl.getUniformLocation(p, "pointers");
+            };
+
+            Renderer.prototype.render = function (now) {
+                var gl = this.gl;
+                var p = this.program;
+                if (!p || gl.getProgramParameter(p, gl.DELETE_STATUS)) return;
+                gl.clearColor(0, 0, 0, 1);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.useProgram(p);
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+                gl.uniform2f(p._resolution, this.canvas.width, this.canvas.height);
+                gl.uniform1f(p._time, now * 1e-3);
+                gl.uniform2f(p._move, this.mouseMove[0], this.mouseMove[1]);
+                gl.uniform2f(p._touch, this.mouseCoords[0], this.mouseCoords[1]);
+                gl.uniform1i(p._pointerCount, this.nbrOfPointers);
+                gl.uniform2fv(p._pointers, this.pointerCoords);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            };
+
+            Renderer.prototype.updateScale = function (s) {
+                this.scale = s;
+                this.gl.viewport(0, 0, this.canvas.width * s, this.canvas.height * s);
+            };
+
+            /* ——— Pointer Handler ——— */
+            function Pointers(element, scale) {
+                this.scale = scale;
+                this.active = false;
+                this.pointers = new Map();
+                this.lastCoords = [0, 0];
+                this.moves = [0, 0];
+
+                var self = this;
+                function map(x, y) {
+                    return [x * self.scale, element.height - y * self.scale];
+                }
+
+                element.addEventListener("pointerdown", function (e) {
+                    self.active = true;
+                    self.pointers.set(e.pointerId, map(e.clientX, e.clientY));
+                });
+                element.addEventListener("pointerup", function (e) {
+                    if (self.pointers.size === 1) self.lastCoords = self.first();
+                    self.pointers.delete(e.pointerId);
+                    self.active = self.pointers.size > 0;
+                });
+                element.addEventListener("pointerleave", function (e) {
+                    if (self.pointers.size === 1) self.lastCoords = self.first();
+                    self.pointers.delete(e.pointerId);
+                    self.active = self.pointers.size > 0;
+                });
+                element.addEventListener("pointermove", function (e) {
+                    if (!self.active) return;
+                    self.lastCoords = [e.clientX, e.clientY];
+                    self.pointers.set(e.pointerId, map(e.clientX, e.clientY));
+                    self.moves = [self.moves[0] + e.movementX, self.moves[1] + e.movementY];
+                });
+            }
+
+            Pointers.prototype.first = function () {
+                var v = this.pointers.values().next().value;
+                return v || this.lastCoords;
+            };
+
+            Pointers.prototype.coords = function () {
+                return this.pointers.size > 0
+                    ? Array.from(this.pointers.values()).flat()
+                    : [0, 0];
+            };
+
+            /* ——— Init shader ——— */
+            var canvas = document.getElementById("shaderCanvas");
+            if (canvas && canvas.getContext("webgl2")) {
+                var dpr = Math.max(1, 0.5 * window.devicePixelRatio);
+                canvas.width = window.innerWidth * dpr;
+                canvas.height = window.innerHeight * dpr;
+
+                var renderer = new Renderer(canvas, dpr);
+                var pointers = new Pointers(canvas, dpr);
+
+                renderer.setup();
+                renderer.init();
+
+                var rafId;
+                function loop(now) {
+                    renderer.mouseCoords = pointers.first();
+                    renderer.nbrOfPointers = pointers.pointers.size;
+                    renderer.pointerCoords = pointers.coords();
+                    renderer.mouseMove = pointers.moves;
+                    renderer.render(now);
+                    rafId = requestAnimationFrame(loop);
+                }
+                loop(0);
+
+                window.addEventListener("resize", function () {
+                    var d = Math.max(1, 0.5 * window.devicePixelRatio);
+                    canvas.width = window.innerWidth * d;
+                    canvas.height = window.innerHeight * d;
+                    renderer.updateScale(d);
+                    pointers.scale = d;
+                });
+            }
+        })();
+    </script>
+
+    <!-- ——— Page interactions ——— -->
     <script>
         (function () {
             var overlay = document.getElementById("exitOverlay");
@@ -171,83 +398,21 @@
                     }
                 });
             }
-        })();
-    </script>
 
-    <!-- Ambient floating particles animation -->
-    <script>
-        (function () {
-            var canvas = document.getElementById("ambientCanvas");
-            if (!canvas) return;
-            var ctx = canvas.getContext("2d");
-            var dots = [];
-            var N = 45;
-            var linkDist = 120;
-
-            function resize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-
-            function createDot() {
-                return {
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    r: 1.2 + Math.random() * 2.2,
-                    vx: (Math.random() - 0.5) * 0.25,
-                    vy: -0.15 - Math.random() * 0.35,
-                    o: 0.12 + Math.random() * 0.28
-                };
-            }
-
-            function init() {
-                resize();
-                dots = [];
-                for (var i = 0; i < N; i++) dots.push(createDot());
-            }
-
-            function frame() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                /* Faint connecting lines between nearby dots */
-                for (var i = 0; i < dots.length; i++) {
-                    for (var j = i + 1; j < dots.length; j++) {
-                        var dx = dots[i].x - dots[j].x;
-                        var dy = dots[i].y - dots[j].y;
-                        var d = Math.sqrt(dx * dx + dy * dy);
-                        if (d < linkDist) {
-                            var alpha = (1 - d / linkDist) * 0.06;
-                            ctx.beginPath();
-                            ctx.moveTo(dots[i].x, dots[i].y);
-                            ctx.lineTo(dots[j].x, dots[j].y);
-                            ctx.strokeStyle = "rgba(220, 159, 133, " + alpha + ")";
-                            ctx.lineWidth = 0.5;
-                            ctx.stroke();
+            /* Scroll reveal for below-fold content */
+            var reveals = document.querySelectorAll(".lp-reveal");
+            if (reveals.length && "IntersectionObserver" in window) {
+                var observer = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add("is-visible");
                         }
-                    }
-                }
-
-                /* Draw and move dots */
-                for (var k = 0; k < dots.length; k++) {
-                    var p = dots[k];
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    if (p.y < -20 || p.x < -20 || p.x > canvas.width + 20) {
-                        dots[k] = createDot();
-                        dots[k].y = canvas.height + 10;
-                    }
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.r, 0, 6.2832);
-                    ctx.fillStyle = "rgba(220, 159, 133, " + p.o + ")";
-                    ctx.fill();
-                }
-
-                requestAnimationFrame(frame);
+                    });
+                }, { threshold: 0.15 });
+                reveals.forEach(function (el) { observer.observe(el); });
+            } else {
+                reveals.forEach(function (el) { el.classList.add("is-visible"); });
             }
-
-            window.addEventListener("resize", resize);
-            init();
-            frame();
         })();
     </script>
 
