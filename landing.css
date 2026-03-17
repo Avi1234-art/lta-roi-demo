@@ -337,17 +337,17 @@ body.is-transitioning #shaderCanvas {
 
 .lp-shimmer-text {
     font-family: "Source Sans 3", system-ui, sans-serif;
-    font-size: 1.4rem;
-    font-weight: 400;
+    font-size: 2rem;
+    font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     background: linear-gradient(
         90deg,
-        var(--lp-muted) 0%,
-        var(--lp-muted) 40%,
+        #e8ddd0 0%,
+        #e8ddd0 40%,
         #fff 50%,
-        var(--lp-muted) 60%,
-        var(--lp-muted) 100%
+        #e8ddd0 60%,
+        #e8ddd0 100%
     );
     background-size: 250% 100%;
     -webkit-background-clip: text;
