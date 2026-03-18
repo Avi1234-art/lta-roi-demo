@@ -983,7 +983,6 @@ function updateLookupModeUI() {
   const aiMode = lookupMode === "ai";
   autofillButton.classList.toggle("hidden", !aiMode);
   autofillButton.disabled = !aiMode;
-  companySearchRow.classList.toggle("with-action", aiMode);
   aiModeNote.classList.toggle("hidden", !aiMode);
 
   if (aiMode) {
