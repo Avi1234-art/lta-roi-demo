@@ -538,7 +538,7 @@ label {
   opacity: 0.5;
 }
 
-/* ——— Mode toggle (shimmer buttons) ——— */
+/* ——— Mode toggle (single shimmer toggle) ——— */
 @keyframes shimmer2 {
   0% { background-position: 0% 0%; }
   100% { background-position: -200% 0%; }
@@ -548,67 +548,58 @@ label {
   margin: 0 0 0.85rem;
   padding: 0;
   border: 0;
-  display: inline-flex;
-  gap: 0.5rem;
+  display: block;
 }
 
-.mode-option {
+.mode-toggle-wrap {
   position: relative;
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
+  display: inline-block;
 }
 
-.mode-option input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.shimmer-btn {
+.mode-toggle-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  min-height: 42px;
-  padding: 0 1.1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  gap: 0.5rem;
+  height: 42px;
+  padding: 0 1.2rem;
+  border: 1px solid rgba(120, 60, 180, 0.35);
+  border-radius: 10px;
   font-weight: 600;
   font-size: 0.85rem;
   letter-spacing: 0.04em;
-  color: var(--dim);
-  background: linear-gradient(110deg, var(--surface) 45%, #2a2328 55%, var(--surface));
-  background-size: 200% 100%;
-  transition: color 250ms, border-color 250ms, box-shadow 250ms;
-}
-
-.shimmer-btn svg {
-  width: 14px;
-  height: 14px;
-  opacity: 0.5;
-  transition: opacity 250ms;
-}
-
-/* Active/checked state */
-.mode-option input:checked + .shimmer-btn {
   color: var(--foreground);
-  border-color: rgba(120, 60, 180, 0.4);
   background: linear-gradient(110deg, #0d0b12 45%, #1e1a2e 55%, #0d0b12);
   background-size: 200% 100%;
   animation: shimmer2 2.5s infinite linear;
-  box-shadow: 0 0 12px -4px rgba(100, 50, 170, 0.2);
+  box-shadow: 0 0 15px -5px rgba(100, 50, 170, 0.25);
+  cursor: pointer;
+  transition: box-shadow 250ms, border-color 250ms, transform 200ms;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.mode-option input:checked + .shimmer-btn svg {
-  opacity: 1;
+.mode-toggle-btn:hover {
+  border-color: rgba(120, 60, 180, 0.55);
+  box-shadow: 0 0 25px -5px rgba(100, 50, 170, 0.4);
+  transform: scale(1.02);
 }
 
-/* Hover */
-.mode-option:hover .shimmer-btn {
-  border-color: rgba(120, 60, 180, 0.25);
-  color: var(--muted-foreground);
+.mode-toggle-btn:active {
+  transform: scale(0.98);
+}
+
+.mode-toggle-icon {
+  display: flex;
+  align-items: center;
+}
+
+.mode-toggle-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mode-toggle-label {
+  white-space: nowrap;
 }
 
 /* Tooltip */
@@ -616,17 +607,16 @@ label {
   position: absolute;
   bottom: calc(100% + 10px);
   left: 50%;
-  transform: translateX(-50%);
-  width: 240px;
-  padding: 0.6rem 0.8rem;
+  width: 260px;
+  padding: 0.65rem 0.85rem;
   background: var(--surface);
   border: 1px solid rgba(120, 60, 180, 0.2);
   border-radius: 8px;
   font-size: 0.75rem;
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--muted-foreground);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
   opacity: 0;
   pointer-events: none;
   transition: opacity 200ms, transform 200ms;
@@ -644,7 +634,7 @@ label {
   border-top-color: rgba(120, 60, 180, 0.2);
 }
 
-.mode-option:hover .mode-tooltip {
+.mode-toggle-wrap:hover .mode-tooltip {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
   pointer-events: auto;

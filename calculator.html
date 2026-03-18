@@ -53,22 +53,20 @@
       <form id="roi-form" novalidate>
         <fieldset class="mode-toggle" aria-label="Lookup mode">
           <legend class="sr-only">Lookup mode</legend>
-          <label class="mode-option">
-            <input type="radio" name="lookupMode" value="ai" checked />
-            <span class="shimmer-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              AI Powered
-            </span>
-            <div class="mode-tooltip">Auto-fills company data using public sources (Wikipedia &amp; Wikidata) — no API keys needed.</div>
-          </label>
-          <label class="mode-option">
-            <input type="radio" name="lookupMode" value="manual" />
-            <span class="shimmer-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Manual
-            </span>
-            <div class="mode-tooltip">Enter company size, tooling spend, and sales volume directly — full control over every input.</div>
-          </label>
+          <!-- Hidden radios for app.js compatibility -->
+          <input type="radio" name="lookupMode" value="ai" checked class="sr-only" id="radioAi" />
+          <input type="radio" name="lookupMode" value="manual" class="sr-only" id="radioManual" />
+
+          <div class="mode-toggle-wrap">
+            <button type="button" id="modeToggleBtn" class="mode-toggle-btn" data-mode="ai">
+              <span class="mode-toggle-icon" id="modeIcon">
+                <svg class="mode-icon--ai" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                <svg class="mode-icon--manual" style="display:none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </span>
+              <span class="mode-toggle-label" id="modeLabel">AI Powered</span>
+            </button>
+            <div class="mode-tooltip" id="modeTooltip">Auto-fills company data using public sources (Wikipedia &amp; Wikidata) — no API keys needed.</div>
+          </div>
         </fieldset>
 
         <div class="input-group company-group">
@@ -364,6 +362,39 @@
   <script src="/lta-roi-demo/app.js" defer></script>
   <script src="/lta-roi-demo/transition.js" defer></script>
   <script src="/lta-roi-demo/demo.js" defer></script>
+
+  <!-- Mode toggle button logic -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var btn = document.getElementById("modeToggleBtn");
+      var label = document.getElementById("modeLabel");
+      var tooltip = document.getElementById("modeTooltip");
+      var aiIcon = document.querySelector(".mode-icon--ai");
+      var manualIcon = document.querySelector(".mode-icon--manual");
+      var radioAi = document.getElementById("radioAi");
+      var radioManual = document.getElementById("radioManual");
+
+      var tips = {
+        ai: "Auto-fills company data using public sources (Wikipedia & Wikidata) \u2014 no API keys needed.",
+        manual: "Enter company size, tooling spend, and sales volume directly \u2014 full control over every input."
+      };
+
+      btn.addEventListener("click", function () {
+        var current = btn.dataset.mode;
+        var next = current === "ai" ? "manual" : "ai";
+        btn.dataset.mode = next;
+        label.textContent = next === "ai" ? "AI Powered" : "Manual";
+        tooltip.textContent = tips[next];
+        aiIcon.style.display = next === "ai" ? "" : "none";
+        manualIcon.style.display = next === "manual" ? "" : "none";
+
+        /* Toggle hidden radios and fire change for app.js */
+        var radio = next === "ai" ? radioAi : radioManual;
+        radio.checked = true;
+        radio.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    });
+  </script>
 </body>
 
 </html>
