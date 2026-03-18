@@ -20,6 +20,9 @@
     <canvas id="transitionCanvas"></canvas>
   </div>
 
+  <!-- Ambient dotted surface -->
+  <canvas id="dotCanvas"></canvas>
+
   <main class="page-shell">
 
     <!-- Calculator nav -->
@@ -394,6 +397,78 @@
         radio.dispatchEvent(new Event("change", { bubbles: true }));
       });
     });
+  </script>
+
+  <!-- Ambient dotted surface animation -->
+  <script>
+    (function () {
+      var canvas = document.getElementById("dotCanvas");
+      if (!canvas) return;
+      var ctx = canvas.getContext("2d");
+
+      var COLS = 28;
+      var ROWS = 40;
+      var SEP = 140;
+      var count = 0;
+
+      /* Camera position (looking down at an angle) */
+      var camX = 0, camY = 320, camZ = 1100;
+      var focalLen = 500;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function frame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        var cx = canvas.width / 2;
+        var cy = canvas.height / 2;
+
+        for (var ix = 0; ix < COLS; ix++) {
+          for (var iy = 0; iy < ROWS; iy++) {
+            /* 3D position */
+            var x = ix * SEP - (COLS * SEP) / 2;
+            var z = iy * SEP - (ROWS * SEP) / 2;
+            var y = Math.sin((ix + count) * 0.3) * 45 + Math.sin((iy + count) * 0.5) * 45;
+
+            /* Translate relative to camera */
+            var dx = x - camX;
+            var dy = y - camY;
+            var dz = z - camZ;
+
+            if (dz >= -10) continue; /* Behind camera */
+
+            /* Perspective projection */
+            var scale = focalLen / -dz;
+            var sx = cx + dx * scale;
+            var sy = cy + dy * scale;
+
+            /* Cull offscreen */
+            if (sx < -10 || sx > canvas.width + 10 || sy < -10 || sy > canvas.height + 10) continue;
+
+            /* Size and opacity fall off with distance */
+            var dist = -dz;
+            var size = Math.max(0.8, 3.5 * scale);
+            var alpha = Math.min(0.12, 0.35 * scale);
+
+            /* Warm dot color */
+            ctx.beginPath();
+            ctx.arc(sx, sy, size, 0, 6.2832);
+            ctx.fillStyle = "rgba(200, 170, 150, " + alpha + ")";
+            ctx.fill();
+          }
+        }
+
+        count += 0.04;
+        requestAnimationFrame(frame);
+      }
+
+      resize();
+      window.addEventListener("resize", resize);
+      frame();
+    })();
   </script>
 </body>
 
