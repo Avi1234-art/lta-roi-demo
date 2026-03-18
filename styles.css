@@ -331,6 +331,12 @@ label {
   margin-bottom: 0.85rem;
 }
 
+/* Keep company search group above following sections so autocomplete overlaps */
+.input-group.company-group {
+  position: relative;
+  z-index: 10;
+}
+
 /* ——— Animated search bar ——— */
 @property --glow-angle {
   syntax: "<angle>";
