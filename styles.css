@@ -316,6 +316,146 @@ label {
   margin-bottom: 0.85rem;
 }
 
+/* ——— Glowing search bar ——— */
+.glow-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.glow-input-row {
+  position: relative;
+  z-index: 2;
+}
+
+.glow-input-row input[type="text"] {
+  background: var(--background);
+  border-color: transparent;
+}
+
+.glow-input-row input[type="text"]:focus-visible {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* Shared glow layer base */
+.glow-layer {
+  position: absolute;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  pointer-events: none;
+}
+
+.glow-layer::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  width: 600px;
+  height: 600px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(82deg);
+  background-repeat: no-repeat;
+  transition: transform 2s ease;
+}
+
+/* Hover + focus-within rotations */
+.glow-search-wrap:hover .glow-layer::before {
+  transform: translate(-50%, -50%) rotate(-98deg);
+}
+
+.glow-search-wrap:focus-within .glow-layer::before {
+  transform: translate(-50%, -50%) rotate(420deg);
+  transition-duration: 4s;
+}
+
+/* Layer 1: Outer glow (wide, blurry) */
+.glow-layer--outer {
+  inset: -4px;
+  filter: blur(3px);
+}
+
+.glow-layer--outer::before {
+  width: 999px;
+  height: 999px;
+  transform: translate(-50%, -50%) rotate(60deg);
+  background: conic-gradient(
+    #000, #8b5a3a 5%, #000 38%, #000 50%, #dc9f85 60%, #000 87%
+  );
+}
+
+.glow-search-wrap:hover .glow-layer--outer::before {
+  transform: translate(-50%, -50%) rotate(-120deg);
+}
+
+.glow-search-wrap:focus-within .glow-layer--outer::before {
+  transform: translate(-50%, -50%) rotate(420deg);
+  transition-duration: 4s;
+}
+
+/* Layer 2 & 3: Mid glow (warm copper conic) */
+.glow-layer--mid {
+  inset: -2px;
+  filter: blur(3px);
+}
+
+.glow-layer--mid::before {
+  background: conic-gradient(
+    rgba(0,0,0,0), #6b3a20, rgba(0,0,0,0) 10%,
+    rgba(0,0,0,0) 50%, #8b5a3a, rgba(0,0,0,0) 60%
+  );
+}
+
+/* Layer 4: Edge highlight (bright, thin) */
+.glow-layer--edge {
+  inset: -1px;
+  filter: blur(2px);
+}
+
+.glow-layer--edge::before {
+  transform: translate(-50%, -50%) rotate(83deg);
+  background: conic-gradient(
+    rgba(0,0,0,0) 0%, #e5ad94, rgba(0,0,0,0) 8%,
+    rgba(0,0,0,0) 50%, #f0c97f, rgba(0,0,0,0) 58%
+  );
+  filter: brightness(1.4);
+}
+
+.glow-search-wrap:hover .glow-layer--edge::before {
+  transform: translate(-50%, -50%) rotate(-97deg);
+}
+
+.glow-search-wrap:focus-within .glow-layer--edge::before {
+  transform: translate(-50%, -50%) rotate(443deg);
+  transition-duration: 4s;
+}
+
+/* Layer 5: Inner border (crisp, closest to input) */
+.glow-layer--inner {
+  inset: 0;
+  filter: blur(0.5px);
+}
+
+.glow-layer--inner::before {
+  transform: translate(-50%, -50%) rotate(70deg);
+  background: conic-gradient(
+    #1c191c, #8b5a3a 5%, #1c191c 14%,
+    #1c191c 50%, #dc9f85 60%, #1c191c 64%
+  );
+  filter: brightness(1.3);
+}
+
+.glow-search-wrap:hover .glow-layer--inner::before {
+  transform: translate(-50%, -50%) rotate(-110deg);
+}
+
+.glow-search-wrap:focus-within .glow-layer--inner::before {
+  transform: translate(-50%, -50%) rotate(430deg);
+  transition-duration: 4s;
+}
+
 /* ——— Autocomplete dropdown ——— */
 .autocomplete-dropdown {
   position: absolute;

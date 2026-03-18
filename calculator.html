@@ -65,10 +65,19 @@
 
         <div class="input-group company-group">
           <label for="companyName">Company name</label>
-          <div id="companySearchRow" class="inline-input-row">
-            <input id="companyName" name="companyName" type="text" autocomplete="organization"
-              placeholder="Search for Google..." />
-            <button type="button" id="autofillBtn" class="btn-primary hidden">Run AI-powered lookup</button>
+          <div class="glow-search-wrap" id="glowSearchWrap">
+            <!-- Glow layers -->
+            <div class="glow-layer glow-layer--outer"></div>
+            <div class="glow-layer glow-layer--mid"></div>
+            <div class="glow-layer glow-layer--mid"></div>
+            <div class="glow-layer glow-layer--edge"></div>
+            <div class="glow-layer glow-layer--inner"></div>
+            <!-- Actual input row -->
+            <div id="companySearchRow" class="inline-input-row glow-input-row">
+              <input id="companyName" name="companyName" type="text" autocomplete="organization"
+                placeholder="Search for Google..." />
+              <button type="button" id="autofillBtn" class="btn-primary hidden">Run AI-powered lookup</button>
+            </div>
           </div>
           <p id="lookupStatus" class="field-note" role="status" aria-live="polite">Manual mode is on. Enter values
             directly.</p>
