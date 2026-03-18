@@ -55,11 +55,19 @@
           <legend class="sr-only">Lookup mode</legend>
           <label class="mode-option">
             <input type="radio" name="lookupMode" value="ai" checked />
-            <span>AI Powered</span>
+            <span class="shimmer-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+              AI Powered
+            </span>
+            <div class="mode-tooltip">Auto-fills company data using public sources (Wikipedia &amp; Wikidata) — no API keys needed.</div>
           </label>
           <label class="mode-option">
             <input type="radio" name="lookupMode" value="manual" />
-            <span>Manual</span>
+            <span class="shimmer-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Manual
+            </span>
+            <div class="mode-tooltip">Enter company size, tooling spend, and sales volume directly — full control over every input.</div>
           </label>
         </fieldset>
 
@@ -76,15 +84,8 @@
               <span>AI Lookup</span>
             </button>
           </div>
-          <p id="lookupStatus" class="field-note" role="status" aria-live="polite">Manual mode is on. Enter values
-            directly.</p>
-          <p id="aiModeNote" class="field-note hidden">
-            AI Powered mode uses Wikidata/Wikipedia via Cloudflare Worker:
-            <a href="https://persana-company-lookup.avi-lta-demo.workers.dev/company-lookup" target="_blank"
-              rel="noopener noreferrer">
-              data source endpoint
-            </a>.
-          </p>
+          <p id="lookupStatus" class="sr-only" role="status" aria-live="polite">Manual mode is on. Enter values directly.</p>
+          <p id="aiModeNote" class="sr-only">AI Powered mode uses Wikidata/Wikipedia via Cloudflare Worker.</p>
 
           <section id="lookupMeta" class="lookup-meta hidden" aria-label="Lookup confidence and sources">
             <div class="lookup-meta-head">
