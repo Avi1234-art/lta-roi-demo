@@ -391,6 +391,31 @@
                 }, 3400);
             }
 
+            /* Transition that loads an iframe instead of navigating (for recording) */
+            function smoothTransitionToIframe(iframeSrc) {
+                /* Phase 1: fade out text, start canvas zoom */
+                document.body.classList.add("is-transitioning");
+
+                /* Phase 2: show shimmer loading text */
+                setTimeout(function () {
+                    if (transition) transition.classList.add("is-active");
+                }, 350);
+
+                /* Phase 3: fade to dark */
+                setTimeout(function () {
+                    if (overlay) overlay.classList.add("is-active");
+                }, 2800);
+
+                /* Phase 4: load calculator in full-screen iframe */
+                setTimeout(function () {
+                    var iframe = document.createElement("iframe");
+                    iframe.className = "lp-record-iframe";
+                    iframe.src = iframeSrc;
+                    iframe.allow = "autoplay";
+                    document.body.appendChild(iframe);
+                }, 3400);
+            }
+
             /* Calculator button */
             var calcBtn = document.getElementById("launchCalcBtn");
             if (calcBtn) {
@@ -424,15 +449,73 @@
                     var card = e.target.closest(".lp-demo-picker-card");
                     if (card) {
                         var company = card.dataset.company;
-                        var dest = "/lta-roi-demo/calculator.html?demo=1&company=" + company;
-                        if (pendingRecord) dest += "&record=1";
                         picker.classList.remove("is-active");
-                        smoothNavigate(dest);
+
+                        if (pendingRecord) {
+                            startRecordFlow(company);
+                        } else {
+                            smoothNavigate("/lta-roi-demo/calculator.html?demo=1&company=" + company);
+                        }
                         return;
                     }
                     if (e.target.id === "demoPickerCancel") {
                         picker.classList.remove("is-active");
                         pendingRecord = false;
+                    }
+                });
+            }
+
+            /* ——— Record flow ——— */
+            async function startRecordFlow(company) {
+                /* 1. Prompt browser to share this tab */
+                var stream;
+                try {
+                    stream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { displaySurface: "browser" },
+                        audio: false
+                    });
+                } catch (e) {
+                    return; /* user cancelled */
+                }
+
+                var chunks = [];
+                var recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+
+                recorder.ondataavailable = function (e) {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
+
+                recorder.onstop = function () {
+                    stream.getTracks().forEach(function (t) { t.stop(); });
+                    var blob = new Blob(chunks, { type: "video/webm" });
+                    var a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = "persana-demo-" + company + "-" + Date.now() + ".webm";
+                    a.click();
+                };
+
+                /* If user stops sharing via browser UI */
+                stream.getVideoTracks()[0].onended = function () {
+                    if (recorder.state === "recording") recorder.stop();
+                };
+
+                recorder.start();
+
+                /* 2. Let the landing page be captured for 3 seconds */
+                await new Promise(function (resolve) { setTimeout(resolve, 3000); });
+
+                /* 3. Play the transition animation, then load calculator in iframe */
+                var iframeSrc = "/lta-roi-demo/calculator.html?demo=1&company=" + company + "&autoplay=1";
+                smoothTransitionToIframe(iframeSrc);
+
+                /* 4. Listen for demo-ended message from the iframe */
+                window.addEventListener("message", function handler(e) {
+                    if (e.data && e.data.type === "demo-ended") {
+                        window.removeEventListener("message", handler);
+                        /* Brief pause after demo ends, then stop recording */
+                        setTimeout(function () {
+                            if (recorder.state === "recording") recorder.stop();
+                        }, 1500);
                     }
                 });
             }
