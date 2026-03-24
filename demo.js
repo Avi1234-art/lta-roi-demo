@@ -258,8 +258,11 @@
         tooltip.style.width = `${tooltipWidth}px`;
     }
 
+    /* ——— Auto-play settings ——— */
+    const AUTOPLAY_STEP_DELAY = 6000; /* ms each step stays visible */
+
     /* ——— Demo controller ——— */
-    function startDemo(companyKey) {
+    function startDemo(companyKey, autoPlay) {
         const co = DEMO_COMPANIES.find((c) => c.key === companyKey);
         if (!co) return;
 
@@ -284,6 +287,7 @@
             let currentStep = 0;
             let isTransitioning = false;
             let prevHighlight = null;
+            let autoPlayTimer = null;
 
             const { overlay, dot, tooltip } = createSpotlightUI();
             const titleEl = document.getElementById("demoTitle");
@@ -300,9 +304,22 @@
                 }
             }
 
+            function scheduleAutoAdvance() {
+                if (!autoPlay) return;
+                clearTimeout(autoPlayTimer);
+                autoPlayTimer = setTimeout(() => {
+                    if (currentStep >= steps.length - 1) {
+                        endDemo();
+                    } else {
+                        showStep(currentStep + 1, false);
+                    }
+                }, AUTOPLAY_STEP_DELAY);
+            }
+
             function showStep(index, isFirst) {
                 if (isTransitioning) return;
                 isTransitioning = true;
+                clearTimeout(autoPlayTimer);
 
                 const step = steps[index];
                 const targetEl = document.querySelector(step.target);
@@ -355,12 +372,14 @@
                             dot.classList.add("is-active");
                             tooltip.classList.add("is-active");
                             isTransitioning = false;
+                            scheduleAutoAdvance();
                         }, 150);
                     }, 450);
                 }, fadeOutDuration);
             }
 
             function endDemo() {
+                clearTimeout(autoPlayTimer);
                 removeHighlight();
                 overlay.classList.remove("is-active");
                 dot.classList.remove("is-active");
@@ -377,7 +396,13 @@
                 const url = new URL(window.location);
                 url.searchParams.delete("demo");
                 url.searchParams.delete("company");
+                url.searchParams.delete("record");
                 window.history.replaceState({}, "", url.toString());
+
+                /* If recording, stop it */
+                if (window._demoRecorder && window._demoRecorder.state === "recording") {
+                    window._demoRecorder.stop();
+                }
             }
 
             nextBtn.addEventListener("click", () => {
@@ -416,20 +441,130 @@
         }, 600);
     }
 
+    /* ——— Screen recorder ——— */
+    function createRecordUI() {
+        const bar = document.createElement("div");
+        bar.id = "recordBar";
+        bar.className = "record-bar";
+        bar.innerHTML = `
+      <div class="record-bar-inner">
+        <span class="record-bar-dot"></span>
+        <span class="record-bar-label" id="recordLabel">Ready to record</span>
+        <button class="record-bar-btn record-bar-btn--start" id="recordStartBtn">Start Recording</button>
+        <button class="record-bar-btn record-bar-btn--stop hidden" id="recordStopBtn">Stop Recording</button>
+      </div>
+    `;
+        document.body.appendChild(bar);
+
+        /* Inject styles */
+        const style = document.createElement("style");
+        style.textContent = `
+      .record-bar{position:fixed;top:0;left:0;right:0;z-index:99999;padding:10px 20px;background:rgba(24,24,24,0.92);backdrop-filter:blur(10px);border-bottom:1px solid #35211a;display:flex;justify-content:center;transition:background 300ms}
+      .record-bar.is-recording{background:rgba(180,40,40,0.92)}
+      .record-bar-inner{display:flex;align-items:center;gap:12px}
+      .record-bar-dot{width:10px;height:10px;border-radius:50%;background:#666;transition:background 300ms}
+      .record-bar.is-recording .record-bar-dot{background:#ef4444;animation:recPulse 1s ease-in-out infinite}
+      .record-bar-label{font-family:"IBM Plex Mono",monospace;font-size:0.75rem;color:#b6a596;text-transform:uppercase;letter-spacing:0.12em}
+      .record-bar-btn{font-family:"IBM Plex Mono",monospace;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;padding:6px 16px;border-radius:100px;border:1px solid #35211a;cursor:pointer;transition:all 200ms}
+      .record-bar-btn--start{background:rgba(220,159,133,0.15);color:#dc9f85;border-color:#dc9f85}
+      .record-bar-btn--start:hover{background:rgba(220,159,133,0.3)}
+      .record-bar-btn--stop{background:rgba(239,68,68,0.15);color:#ef4444;border-color:#ef4444}
+      .record-bar-btn--stop:hover{background:rgba(239,68,68,0.3)}
+      .hidden{display:none!important}
+      @keyframes recPulse{0%,100%{opacity:1}50%{opacity:0.4}}
+    `;
+        document.head.appendChild(style);
+
+        return bar;
+    }
+
+    async function startRecording(companyKey) {
+        const bar = document.getElementById("recordBar");
+        const startBtn = document.getElementById("recordStartBtn");
+        const stopBtn = document.getElementById("recordStopBtn");
+        const label = document.getElementById("recordLabel");
+
+        let stream;
+        try {
+            stream = await navigator.mediaDevices.getDisplayMedia({
+                video: { displaySurface: "browser" },
+                audio: false
+            });
+        } catch (e) {
+            label.textContent = "Recording cancelled";
+            return;
+        }
+
+        const chunks = [];
+        const recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+        window._demoRecorder = recorder;
+
+        recorder.ondataavailable = (e) => {
+            if (e.data.size > 0) chunks.push(e.data);
+        };
+
+        recorder.onstop = () => {
+            stream.getTracks().forEach((t) => t.stop());
+            bar.classList.remove("is-recording");
+            label.textContent = "Saving...";
+            stopBtn.classList.add("hidden");
+
+            const blob = new Blob(chunks, { type: "video/webm" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `persana-demo-${companyKey}-${Date.now()}.webm`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            label.textContent = "Recording saved!";
+            setTimeout(() => bar.remove(), 3000);
+        };
+
+        /* If user stops sharing via browser UI */
+        stream.getVideoTracks()[0].onended = () => {
+            if (recorder.state === "recording") recorder.stop();
+        };
+
+        recorder.start();
+        bar.classList.add("is-recording");
+        label.textContent = "Recording...";
+        startBtn.classList.add("hidden");
+        stopBtn.classList.remove("hidden");
+
+        stopBtn.addEventListener("click", () => {
+            if (recorder.state === "recording") recorder.stop();
+        });
+
+        /* Start the demo in auto-play mode after a short pause */
+        setTimeout(() => {
+            startDemo(companyKey, true);
+        }, 800);
+    }
+
     /* ——— Init: check for ?demo=1 ——— */
     function init() {
         const params = new URLSearchParams(window.location.search);
         if (params.get("demo") !== "1") return;
 
-        /* Check if a company was pre-selected from the landing page */
         const companyKey = params.get("company");
+        const isRecord = params.get("record") === "1";
 
         /* Small delay for page to settle */
         const delay = 400;
         setTimeout(() => {
+            if (isRecord && companyKey) {
+                /* Record mode: show record bar, wait for user to click start */
+                createRecordUI();
+                document.getElementById("recordStartBtn").addEventListener("click", () => {
+                    startRecording(companyKey);
+                });
+                return;
+            }
+
             if (companyKey && DEMO_COMPANIES.find((c) => c.key === companyKey)) {
                 /* Company was chosen on landing page — start demo directly */
-                startDemo(companyKey);
+                startDemo(companyKey, false);
             } else {
                 /* No company specified — show picker as fallback */
                 const picker = createPickerOverlay();
@@ -440,7 +575,7 @@
                     if (card) {
                         picker.classList.remove("is-active");
                         setTimeout(() => picker.remove(), 300);
-                        startDemo(card.dataset.company);
+                        startDemo(card.dataset.company, false);
                         return;
                     }
                     if (e.target.id === "demoPickerCancel") {

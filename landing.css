@@ -270,6 +270,49 @@ body {
     transform: translateY(0);
 }
 
+/* ——— Record Demo button ——— */
+.lp-record-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.6rem;
+    background: rgba(239, 68, 68, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #ef8a8a;
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 500;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: color 250ms ease-out, border-color 250ms ease-out, transform 250ms ease-out, box-shadow 250ms ease-out;
+}
+
+.lp-record-btn:hover {
+    color: #fca5a5;
+    border-color: #ef4444;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.15);
+}
+
+.lp-record-btn:active {
+    transform: translateY(0);
+}
+
+.lp-record-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+    animation: pulse 2.4s ease-in-out infinite;
+}
+
 /* ——— Scroll indicator ——— */
 .lp-scroll-hint {
     position: absolute;

@@ -55,6 +55,10 @@
             <a href="/lta-roi-demo/calculator.html?demo=1" class="lp-demo-btn" id="runDemoBtn">
                 &#9654; Run Interactive Demo
             </a>
+            <a href="#" class="lp-record-btn" id="recordDemoBtn">
+                <span class="lp-record-dot" aria-hidden="true"></span>
+                Record Demo Video
+            </a>
         </div>
 
         <!-- Scroll indicator -->
@@ -398,22 +402,37 @@
 
             /* Demo button: show picker, navigate on selection */
             var demoBtn = document.getElementById("runDemoBtn");
+            var recordBtn = document.getElementById("recordDemoBtn");
+            var pendingRecord = false;
+
             if (demoBtn && picker) {
                 demoBtn.addEventListener("click", function (e) {
                     e.preventDefault();
+                    pendingRecord = false;
                     picker.classList.add("is-active");
                 });
+
+                if (recordBtn) {
+                    recordBtn.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        pendingRecord = true;
+                        picker.classList.add("is-active");
+                    });
+                }
 
                 picker.addEventListener("click", function (e) {
                     var card = e.target.closest(".lp-demo-picker-card");
                     if (card) {
                         var company = card.dataset.company;
+                        var dest = "/lta-roi-demo/calculator.html?demo=1&company=" + company;
+                        if (pendingRecord) dest += "&record=1";
                         picker.classList.remove("is-active");
-                        smoothNavigate("/lta-roi-demo/calculator.html?demo=1&company=" + company);
+                        smoothNavigate(dest);
                         return;
                     }
                     if (e.target.id === "demoPickerCancel") {
                         picker.classList.remove("is-active");
+                        pendingRecord = false;
                     }
                 });
             }
