@@ -471,7 +471,12 @@
                 var stream;
                 try {
                     stream = await navigator.mediaDevices.getDisplayMedia({
-                        video: { displaySurface: "browser" },
+                        video: {
+                            displaySurface: "browser",
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 },
+                            frameRate: { ideal: 60 }
+                        },
                         audio: false
                     });
                 } catch (e) {
@@ -487,7 +492,8 @@
                 }
 
                 var chunks = [];
-                var recorder = new MediaRecorder(stream, { mimeType: mimeType });
+                var videoBps = 8000000; /* 8 Mbps for sharp output */
+                var recorder = new MediaRecorder(stream, { mimeType: mimeType, videoBitsPerSecond: videoBps });
 
                 recorder.ondataavailable = function (e) {
                     if (e.data.size > 0) chunks.push(e.data);
