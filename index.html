@@ -478,8 +478,16 @@
                     return; /* user cancelled */
                 }
 
+                /* Pick MP4 if supported (Chrome 121+), fall back to WebM */
+                var mimeType = "video/webm";
+                var fileExt = "webm";
+                if (typeof MediaRecorder.isTypeSupported === "function" && MediaRecorder.isTypeSupported("video/mp4")) {
+                    mimeType = "video/mp4";
+                    fileExt = "mp4";
+                }
+
                 var chunks = [];
-                var recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+                var recorder = new MediaRecorder(stream, { mimeType: mimeType });
 
                 recorder.ondataavailable = function (e) {
                     if (e.data.size > 0) chunks.push(e.data);
@@ -487,10 +495,10 @@
 
                 recorder.onstop = function () {
                     stream.getTracks().forEach(function (t) { t.stop(); });
-                    var blob = new Blob(chunks, { type: "video/webm" });
+                    var blob = new Blob(chunks, { type: mimeType });
                     var a = document.createElement("a");
                     a.href = URL.createObjectURL(blob);
-                    a.download = "persana-demo-" + company + "-" + Date.now() + ".webm";
+                    a.download = "persana-demo-" + company + "-" + Date.now() + "." + fileExt;
                     a.click();
                 };
 
