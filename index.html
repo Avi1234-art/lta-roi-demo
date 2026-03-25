@@ -468,16 +468,18 @@
             /* ——— Record flow ——— */
             async function startRecordFlow(company) {
                 /* 1. Prompt browser to share this tab */
+                var dpr = window.devicePixelRatio || 1;
                 var stream;
                 try {
                     stream = await navigator.mediaDevices.getDisplayMedia({
                         video: {
                             displaySurface: "browser",
-                            width: { ideal: 1920 },
-                            height: { ideal: 1080 },
+                            width: { ideal: Math.round(screen.width * dpr) },
+                            height: { ideal: Math.round(screen.height * dpr) },
                             frameRate: { ideal: 60 }
                         },
-                        audio: false
+                        audio: false,
+                        preferCurrentTab: true
                     });
                 } catch (e) {
                     return; /* user cancelled */
@@ -492,7 +494,7 @@
                 }
 
                 var chunks = [];
-                var videoBps = 8000000; /* 8 Mbps for sharp output */
+                var videoBps = 20000000; /* 20 Mbps for crisp Retina output */
                 var recorder = new MediaRecorder(stream, { mimeType: mimeType, videoBitsPerSecond: videoBps });
 
                 recorder.ondataavailable = function (e) {
